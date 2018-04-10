@@ -62,7 +62,7 @@ class SyncNotificationsCommand extends ContainerAwareCommand
 
                 # -- more success response validation can be added here. ** NOT DOING IT FOR NOW **
                 $notification->setSyncRemoteStatus(true);
-                $notification->setSyncMessage(Notification::SYNC_STATUS_SUCCESS);
+                $notification->setSyncStatus(Notification::SYNC_STATUS_SUCCESS);
                 $notification->setSyncDate(new \DateTime());
 
             }catch (\Exception $e){

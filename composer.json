@@ -1,6 +1,6 @@
 {
     "name": "nti/notification-bundle",
-    "description": "Send notifications throw different applications.",
+    "description": "Symfony 2 notification bundle.",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -14,7 +14,12 @@
             "NTI\\NotificationBundle\\" : ""
         }
     },
+    "keywords" : [
+        "NotificationBundle"
+    ],
     "require": {
-        "php": ">=5.6"
+        "php": ">=5.6",
+        "jms/serializer-bundle": "^1.5.0",
+        "guzzlehttp/guzzle": "~6.0"
     }
 }

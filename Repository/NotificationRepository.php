@@ -31,7 +31,11 @@ class NotificationRepository extends EntityRepository
                     $qb->expr()->isNotNull( 'to_app.requestKey'), # -- request key should not be null
                     $qb->expr()->neq('to_app.id', 'from_app.id')
                 )
-            );
+            )
+        ->andWhere(
+            $qb->expr()->in(array('pending','error'))
+        )
+        ;
 
         return $qb->getQuery()->getResult();
     }
