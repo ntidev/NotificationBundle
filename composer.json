@@ -1,0 +1,20 @@
+{
+    "name": "nti/notification-bundle",
+    "description": "Send notifications throw different applications.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Enercido Alcantara",
+            "email": "ealcantara@syneteksolutions.com"
+        }
+    ],
+    "autoload" : {
+        "psr-4" : {
+            "NTI\\NotificationBundle\\" : ""
+        }
+    },
+    "require": {
+        "php": ">=5.6"
+    }
+}

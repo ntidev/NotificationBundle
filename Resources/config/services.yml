@@ -1,0 +1,24 @@
+services:
+    # -- application services
+    nti.notification.service:
+        class: NTI\NotificationBundle\Service\NotificationService
+        arguments: ["@service_container"]
+
+    nti.notification.application.service:
+        class: NTI\NotificationBundle\Service\ApplicationService
+        arguments: ["@service_container"]
+
+    nti.notification.utilities.service:
+        class: NTI\NotificationBundle\Service\UtilitiesService
+        #arguments: ["@service_container"]
+
+    nti.notification.destination.service:
+        class: NTI\NotificationBundle\Service\DestinationService
+        arguments: ["@service_container"]
+
+    # Form type services
+    nti.notification.form.notification:
+        class: NTI\NotificationBundle\Form\NotificationType
+        arguments: [ "@service_container" ,"@doctrine.orm.entity_manager"]
+        tags:
+            - { name: form.type }
