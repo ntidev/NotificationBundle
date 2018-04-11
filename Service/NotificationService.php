@@ -34,7 +34,10 @@ class NotificationService
     private $client;
     private $prefix;
 
-
+    /**
+     * NotificationService constructor.
+     * @param ContainerInterface $container
+     */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -46,6 +49,10 @@ class NotificationService
         $this->client = new Client();
     }
 
+    /**
+     * @param Application $application
+     * @return mixed
+     */
     public function getAllByApplication(Application $application)
     {
         return $this->em->getRepository(Notification::class)->findBy(array('fromApplication'=>$application), array('scheduleDate'=>'asc'));
@@ -61,6 +68,12 @@ class NotificationService
         return $this->em->getRepository(Notification::class)->findOneBy(array('fromApplication'=>$application, 'code'=>strtolower($code)));
     }
 
+    /**
+     * @param Application $requestApp
+     * @param $data
+     * @param string $formType
+     * @return Notification|DataBaseDoctrineException|InvalidDestinationStructureException
+     */
     public function create(Application $requestApp, $data, $formType = NotificationType::class)
     {
         # -- default application
@@ -177,20 +190,6 @@ class NotificationService
         if(!$form->isValid())
             return $form;
 
-        # -- utils and dependencies
-        $util = $this->container->get('nti.notification.utilities.service');
-//        $stsScheduled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'scheduled'));
-//        $stsAvailable = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'available'));
-//
-//        /**  -- initial validations -- */
-//        # -- Handle Notification Status
-//        if ($notification->getScheduleDate() != null && $notification->getScheduleDate() > new \DateTime()) {
-//            $notification->setStatus($stsScheduled);
-//        } elseif ($notification->getScheduleDate() == null) {
-//            $notification->setScheduleDate(new \DateTime());
-//            $notification->setStatus($stsAvailable);
-//        }
-
         // -- can not change this
         $notification->setCode($code);
         $notification->setToApplication($toApplication);
@@ -206,11 +205,9 @@ class NotificationService
 
         } elseif ($requestApp === $default && $default === $toApplication) {  /**  -- Handling Internal Notification --  */
             $notification->setSyncStatus(Notification::SYNC_STATUS_SUCCESS);
-//            $notification->setSyncDate(new \DateTime());
         } elseif ($requestApp === $default && $default !== $toApplication) {  /**  -- Handling Internal to External Notification --  */
             $notification->setSyncStatus(Notification::SYNC_STATUS_PENDING);
             $notification->setSyncMessage(null); // --  clear old message
-//            $notification->setSyncDate(new \DateTime());
         }
 
         # -- handle destination
@@ -308,7 +305,6 @@ class NotificationService
 
         return true;
     }
-
 
     /**
      * This is main command function
