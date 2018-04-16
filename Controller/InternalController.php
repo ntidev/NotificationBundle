@@ -9,7 +9,22 @@
 namespace NTI\NotificationBundle\Controller;
 
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Security\Core\User\UserInterface;
+
 class InternalController extends Controller
 {
+    /**
+     * @Route("/notifications")
+     * @param Request $request
+     */
+    public function notificationsByDestination(Request $request)
+    {
+
+        $user = $this->getUser();
+//        $user->
+
+    }
 
 }

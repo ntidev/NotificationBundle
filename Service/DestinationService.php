@@ -15,16 +15,30 @@ use NTI\NotificationBundle\Entity\Notification;
 use NTI\NotificationBundle\Exception\DataBaseDoctrineException;
 use NTI\NotificationBundle\Exception\InvalidDestinationStatus;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class DestinationService
 {
     private $container;
     private $em;
 
+    private $destinationMethod;
+    private $authRoles;
+    private $grantedRoles;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
         $this->em = $container->get('doctrine')->getManager();
+        $this->destinationMethod = $container->getParameter('nti.notification.user.destination.id.method');
+        $this->authRoles = $container->getParameter('nti.notification.user.auth.roles');
+        $this->grantedRoles = $container->getParameter('nti.notification.user.granted.roles');
+    }
+
+    public function getUserDestination(UserInterface $user, array $roles = array())
+    {
+        $method = $this->destinationMethod;
+        $destinationId = $user->$method;
     }
 
     /**
@@ -64,6 +78,18 @@ class DestinationService
         }
 
         return $destination;
+
+    }
+
+    /**
+     * @param Destination $destination
+     * @return mixed
+     */
+    public function getNotificationsByDestination(Destination $destination)
+    {
+
+        # -- getting the list here
+        return $this->em->getRepository(Destination::class)->getByWithAvailableNotification($destination);
 
     }
 

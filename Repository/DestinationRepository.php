@@ -1,6 +1,7 @@
 <?php
 
 namespace NTI\NotificationBundle\Repository;
+use NTI\NotificationBundle\Entity\Destination;
 
 /**
  * DestinationRepository
@@ -10,4 +11,47 @@ namespace NTI\NotificationBundle\Repository;
  */
 class DestinationRepository extends \Doctrine\ORM\EntityRepository
 {
+
+    /**
+     * @param Destination $destination
+     * @return array
+     */
+    public function getByWithAvailableNotification(Destination $destination)
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('d')
+            ->from('NotificationBundle:Destination', 'destination')
+            ->leftJoin('destination.notification', 'notification')
+            ->leftJoin('notification.status', 'nSts')
+            ->andWhere(
+                $qb->expr()->eq('destination.destinationId', $destination->getDestinationId()),
+                $qb->expr()->in('nSts.code', array('available','schedule'))
+            )
+        ;
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @param string $destinationId
+     * @return Destination|null
+     */
+    public function getOneByDestinationId(string $destinationId)
+    {
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('d')
+            ->from('NotificationBundle:Destination', 'destination')
+            ->andWhere(
+                $qb->expr()->eq('destination.destinationId', $qb->expr()->literal($destinationId))
+            )->setMaxResults(1)
+        ;
+        $result =  $qb->getQuery()->getResult();
+        # -- get result returns an array
+        if (sizeof($result) > 0) {
+            /** @var Destination $destination */
+            $destination = $result[0];
+            return $destination;
+        }
+        return null;
+    }
 }

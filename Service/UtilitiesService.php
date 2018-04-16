@@ -63,4 +63,9 @@ class UtilitiesService
 
     }
 
+
+    public function isAuthenticated(){
+
+    }
+
 }

@@ -3,6 +3,7 @@
 namespace NTI\NotificationBundle\Repository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr;
+use NTI\NotificationBundle\Entity\Destination;
 
 /**
  * NotificationRepository

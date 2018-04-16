@@ -20,7 +20,10 @@ use Symfony\Component\HttpFoundation\Request;
 class NotificationController extends Controller
 {
     /**
-     *
+     * FOR EXTERNAL APPLICATION USE 
+     */
+    
+    /**
      * @Route("/{token}/notifications")
      * @Method("GET")
      * @param Request $request
@@ -47,7 +50,6 @@ class NotificationController extends Controller
     }
 
     /**
-     *
      * @Route("/{token}/notifications/{code}")
      * @Method("GET")
      * @param Request $request
