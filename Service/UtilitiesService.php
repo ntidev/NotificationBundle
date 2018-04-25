@@ -1,19 +1,25 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ealcantara
- * Date: 3/6/2018
- * Time: 10:40 AM
- */
+
 
 namespace NTI\NotificationBundle\Service;
 
-
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class UtilitiesService
 {
+    private $container;
+    private $authRoles;
+    private $grantedRoles;
+
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+        $this->authRoles = $container->getParameter('nti.notification.user.auth.roles');
+        $this->grantedRoles = $container->getParameter('nti.notification.user.granted.roles');
+    }
 
     /**
      * Generates and return an UUID V4 String
@@ -63,8 +69,25 @@ class UtilitiesService
 
     }
 
+    /**
+     * @param UserInterface $user
+     * @return bool
+     */
+    public function isAuthenticated(UserInterface $user){
+        $authenticated = false;
+        if (!is_array($this->authRoles) && !$user->hasRole($this->authRoles))
+            return $authenticated;
 
-    public function isAuthenticated(){
+        if (is_array($this->authRoles)){
+            foreach ($this->authRoles as $role){
+                if ($user->hasRole($role)){
+                    $authenticated = true;
+                    break;
+                }
+            }
+        }
+
+        return $authenticated;
 
     }
 

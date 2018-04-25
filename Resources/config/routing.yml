@@ -1,6 +1,7 @@
 nti_notification:
     resource: "@NotificationBundle/Controller/"
     type:     annotation
-    prefix: /{_prefix}/
-    requirements:
-        _prefix: "%nti.notification.route.prefix%"
+    prefix: /nti/notify/
+#    prefix: /{_prefix}/
+#    requirements:
+#        _prefix: "%nti.notification.route.prefix%"

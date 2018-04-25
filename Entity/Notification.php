@@ -22,7 +22,7 @@ class Notification
     /**
      * @var int
      *
-     * @Serializer\Groups("nti_notify")
+     * @Serializer\Groups({"nti_notify","nti_notify_destination_notification"})
      *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
@@ -32,21 +32,21 @@ class Notification
 
     /**
      * @var string
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @ORM\Column(name="code", type="string", length=100, unique=true)
      */
     private $code;
 
     /**
      * @var string
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @ORM\Column(name="subject", type="string", length=255)
      */
     private $subject;
 
     /**
      * @var string
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @ORM\Column(name="body", length=4294967295 )
      */
     private $body;
@@ -54,7 +54,7 @@ class Notification
     /**
      * @var \DateTime
      *
-     * @Serializer\Groups("nti_notify")
+     * @Serializer\Groups({"nti_notify","nti_notify_destination_notification"})
      * @Serializer\SerializedName("createdAt")
      * @Serializer\Type("DateTime<'m/d/Y h:i:s A'>")
      *
@@ -65,7 +65,7 @@ class Notification
     /**
      * @var \DateTime
      *
-     * @Serializer\Groups("nti_notify")
+     * @Serializer\Groups({"nti_notify","nti_notify_destination_notification"})
      * @Serializer\SerializedName("updatedAt")
      * @Serializer\Type("DateTime<'m/d/Y h:i:s A'>")
      *
@@ -76,7 +76,7 @@ class Notification
     /**
      * @var \DateTime
      *
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @Serializer\SerializedName("scheduleDate")
      * @Serializer\Type("DateTime<'m/d/Y h:i:s A'>")
      *
@@ -86,7 +86,7 @@ class Notification
 
     /**
      * @var \DateTime
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @Serializer\SerializedName("expirationDate")
      * @Serializer\Type("DateTime<'m/d/Y h:i:s A'>")
      *
@@ -95,14 +95,14 @@ class Notification
     private $expirationDate;
 
     /**
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @ORM\ManyToOne(targetEntity="NTI\NotificationBundle\Entity\Status")
      * @ORM\JoinColumn(name="status_id", referencedColumnName="id")
      **/
     private $status;
 
     /**
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @ORM\ManyToOne(targetEntity="NTI\NotificationBundle\Entity\Type")
      * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
      **/

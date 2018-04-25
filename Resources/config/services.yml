@@ -10,7 +10,7 @@ services:
 
     nti.notification.utilities.service:
         class: NTI\NotificationBundle\Service\UtilitiesService
-        #arguments: ["@service_container"]
+        arguments: ["@service_container"]
 
     nti.notification.destination.service:
         class: NTI\NotificationBundle\Service\DestinationService

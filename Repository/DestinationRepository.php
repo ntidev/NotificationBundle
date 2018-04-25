@@ -16,16 +16,18 @@ class DestinationRepository extends \Doctrine\ORM\EntityRepository
      * @param Destination $destination
      * @return array
      */
-    public function getByWithAvailableNotification(Destination $destination)
+    public function getAvailableNotification(Destination $destination)
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
-        $qb->select('d')
+        $qb->select('destination')
             ->from('NotificationBundle:Destination', 'destination')
             ->leftJoin('destination.notification', 'notification')
             ->leftJoin('notification.status', 'nSts')
+            ->leftJoin('destination.status', 'dSts')
             ->andWhere(
-                $qb->expr()->eq('destination.destinationId', $destination->getDestinationId()),
-                $qb->expr()->in('nSts.code', array('available','schedule'))
+                $qb->expr()->eq('destination.destinationId', $qb->expr()->literal($destination->getDestinationId())),
+                $qb->expr()->in('nSts.code', array('available','schedule')), # -- notification status
+                $qb->expr()->in('dSts.code', array('read','unread')) # -- destination status
             )
         ;
 

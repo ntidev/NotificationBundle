@@ -25,7 +25,7 @@ class Status
     /**
      * @var string
      *
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      *
      * @ORM\Column(name="code", type="string", length=60, unique=true)
      */
@@ -34,7 +34,7 @@ class Status
     /**
      * @var string
      *
-     * @Serializer\Groups({"nti_notify","nti_notify_sync"})
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      *
      * @ORM\Column(name="name", type="string", length=255, unique=true)
      */

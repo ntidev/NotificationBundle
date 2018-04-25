@@ -35,10 +35,15 @@ class DestinationService
         $this->grantedRoles = $container->getParameter('nti.notification.user.granted.roles');
     }
 
-    public function getUserDestination(UserInterface $user, array $roles = array())
+    public function getUserDestination(UserInterface $user)
     {
-        $method = $this->destinationMethod;
-        $destinationId = $user->$method;
+        try {
+            $method = $this->destinationMethod;
+            $destinationId = $user->$method();
+            return $this->em->getRepository(Destination::class)->findOneBy(array('destinationId' => $destinationId));
+        }catch (\Exception $e){
+            return null;
+        }
     }
 
     /**
@@ -82,14 +87,18 @@ class DestinationService
     }
 
     /**
-     * @param Destination $destination
-     * @return mixed
+     * @param UserInterface $user
+     * @return array
      */
-    public function getNotificationsByDestination(Destination $destination)
+    public function getUserNotifications(UserInterface $user)
     {
-
         # -- getting the list here
-        return $this->em->getRepository(Destination::class)->getByWithAvailableNotification($destination);
+        $destination = $this->getUserDestination($user);
+        if ($destination instanceof Destination){
+            return $this->em->getRepository(Destination::class)->getAvailableNotification($destination);
+        }
+
+        return array();
 
     }
 
