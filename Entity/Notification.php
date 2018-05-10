@@ -127,6 +127,16 @@ class Notification
     private $toApplication;
 
     /**
+     * @var bool
+     *
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
+     * @Serializer\SerializedName("allDestinations")
+     *
+     * @ORM\Column(name="all_destination", type="boolean", options={"default": "0"},nullable=false)
+     */
+    private $allDestinations;
+
+    /**
      * @var string
      *
      * @Serializer\Groups("nti_notify")
@@ -581,7 +591,7 @@ class Notification
     /**
      * Set syncRemoteStatus
      *
-     * @param string $syncRemoteStatus
+     * @param boolean $syncRemoteStatus
      *
      * @return Notification
      */
@@ -600,5 +610,29 @@ class Notification
     public function getSyncRemoteStatus()
     {
         return $this->syncRemoteStatus;
+    }
+
+    /**
+     * Set allDestinations
+     *
+     * @param boolean $allDestinations
+     *
+     * @return Notification
+     */
+    public function setAllDestinations($allDestinations)
+    {
+        $this->allDestinations = $allDestinations;
+
+        return $this;
+    }
+
+    /**
+     * Get allDestinations
+     *
+     * @return boolean
+     */
+    public function getAllDestinations()
+    {
+        return $this->allDestinations;
     }
 }

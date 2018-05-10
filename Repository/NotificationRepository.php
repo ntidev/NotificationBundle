@@ -33,10 +33,41 @@ class NotificationRepository extends EntityRepository
                     $qb->expr()->neq('to_app.id', 'from_app.id')
                 )
             )
-        ->andWhere(
-            $qb->expr()->in(array('pending','error'))
-        )
-        ;
+        ->andWhere($qb->expr()->in(array('pending','error')));
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * return the list of notifications with all destinations boolean property active where the
+     * given destinationId is not included.
+     *
+     * @param string $destinationId
+     * @return array
+     */
+    public function getByAllDestinationActive(Destination $destination = null)
+    {
+        $qbs = $this->getEntityManager()->createQueryBuilder();
+        if ($destination) {
+            $qbs->select('d_noti.id')
+                ->from('NotificationBundle:Destination', 'd')
+                ->innerJoin('d.notification', 'd_noti')
+                ->andWhere(
+                    $qbs->expr()->eq('d_noti.allDestinations', $qbs->expr()->literal(true)),
+                    $qbs->expr()->eq('d.destinationId', $qbs->expr()->literal($destination->getDestinationId()))
+                );
+        }
+
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('n')
+            ->from('NotificationBundle:Notification', 'n')
+            ->leftJoin('n.status', 'n_sts')
+            ->andWhere(
+                $qb->expr()->eq('n.allDestinations', $qb->expr()->literal(true)),
+                $qb->expr()->in('n_sts.code', array('scheduled','available'))
+            );
+        if ($destination)
+            $qb->andWhere($qbs->expr()->notIn('n.id', $qbs->getDQL()));
 
         return $qb->getQuery()->getResult();
     }

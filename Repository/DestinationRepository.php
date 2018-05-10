@@ -16,7 +16,7 @@ class DestinationRepository extends \Doctrine\ORM\EntityRepository
      * @param Destination $destination
      * @return array
      */
-    public function getAvailableNotification(Destination $destination)
+    public function getAvailableNotification(Destination $destination = null)
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('destination')

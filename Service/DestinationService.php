@@ -14,6 +14,7 @@ use NTI\NotificationBundle\Entity\DestinationStatus;
 use NTI\NotificationBundle\Entity\Notification;
 use NTI\NotificationBundle\Exception\DataBaseDoctrineException;
 use NTI\NotificationBundle\Exception\InvalidDestinationStatus;
+use NTI\NotificationBundle\Exception\NoDestinationException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -42,7 +43,7 @@ class DestinationService
             $destinationId = $user->$method();
             return $this->em->getRepository(Destination::class)->findOneBy(array('destinationId' => $destinationId));
         }catch (\Exception $e){
-            return null;
+            throw $e;
         }
     }
 
@@ -94,14 +95,42 @@ class DestinationService
     {
         # -- getting the list here
         $destination = $this->getUserDestination($user);
-        if ($destination instanceof Destination){
-            return $this->em->getRepository(Destination::class)->getAvailableNotification($destination);
-        }
-
-        return array();
+        $this->includeToAllDestinationsNotifications($user, $destination);
+        return $this->em->getRepository(Destination::class)->getAvailableNotification($destination);
 
     }
 
+    /**
+     * This methods is in charge of add the logged user as destination of the new notifications
+     * marked with the allDestination property as true.
+     *
+     * @param Destination|null $destination
+     */
+    private function includeToAllDestinationsNotifications(UserInterface $user, Destination $destination = null)
+    {
+        $notifications = $this->em->getRepository(Notification::class)->getByAllDestinationActive($destination);
+        $unread = $this->em->getRepository(DestinationStatus::class)->findOneBy(array('code'=>'unread'));
+
+        $method = $this->destinationMethod;
+        $destinationId = $user->$method();
+
+        /** @var Notification $notification */
+        foreach ($notifications as $notification){
+            $d = new Destination();
+            $d->setNotification($notification);
+            $d->setDestinationId($destinationId);
+            $d->setStatus($unread);
+            $notification->addDestination($d);
+            try{
+                $this->em->persist($d);
+                $this->em->flush();
+            }catch (\Exception $e){
+                throw new DataBaseDoctrineException('Error creating the destination for new notifications target to all destinations.');
+            }
+        }
+
+
+    }
 
 
 }
