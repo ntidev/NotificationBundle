@@ -11,6 +11,7 @@ use NTI\NotificationBundle\Entity\Destination;
 use NTI\NotificationBundle\Entity\DestinationStatus;
 use NTI\NotificationBundle\Entity\Notification;
 use NTI\NotificationBundle\Entity\Status;
+use NTI\NotificationBundle\Entity\Type;
 use NTI\NotificationBundle\Exception\ApplicationNotFoundException;
 use NTI\NotificationBundle\Exception\DataBaseDoctrineException;
 use NTI\NotificationBundle\Exception\InvalidApplicationRequestKeyException;
@@ -66,6 +67,14 @@ class NotificationService
     public function getOneByCodeAndApplication(Application $application, $code)
     {
         return $this->em->getRepository(Notification::class)->findOneBy(array('fromApplication'=>$application, 'code'=>strtolower($code)));
+    }
+
+    /**
+     * @param int $id
+     * @return mixed
+     */
+    public function getById(int $id){
+        return $this->em->getRepository(Notification::class)->find($id);
     }
 
     /**
@@ -344,6 +353,22 @@ class NotificationService
             throw new SyncRequestException($e->getMessage());
         }
 
+    }
+
+    /**
+     * Return the list of active notification status
+     * @return mixed
+     */
+    public function getActiveNotificationStatus(){
+        return $this->em->getRepository(Status::class)->findBy(array('isActive'=>true), array('name'=>'asc'));
+    }
+
+    /**
+     * Return the list of active notification status
+     * @return mixed
+     */
+    public function getActiveNotificationTypes(){
+        return $this->em->getRepository(Type::class)->findBy(array('isActive'=>true), array('name'=>'asc'));
     }
 
 
