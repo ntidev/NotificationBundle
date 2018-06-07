@@ -33,7 +33,7 @@ class NotificationRepository extends EntityRepository
                     $qb->expr()->neq('to_app.id', 'from_app.id')
                 )
             )
-        ->andWhere($qb->expr()->in(array('pending','error')));
+        ->andWhere($qb->expr()->in('n.syncStatus',array('pending','error')));
 
         return $qb->getQuery()->getResult();
     }

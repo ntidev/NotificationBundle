@@ -56,6 +56,7 @@ class SyncNotificationsCommand extends ContainerAwareCommand
         # -- send them to sync here
         /** @var Notification $notification */
         foreach ($notifications as $notification){
+            $this->output->writeln('NTI:Notification:Sync::: Processing ::: '.$notification->getId());
             try{
 
                 $notificationSrv->syncSendRemoteNotification($notification,$default);
@@ -65,22 +66,30 @@ class SyncNotificationsCommand extends ContainerAwareCommand
                 $notification->setSyncStatus(Notification::SYNC_STATUS_SUCCESS);
                 $notification->setSyncDate(new \DateTime());
 
+                $this->output->writeln('NTI:Notification:Sync::: Success ::: '.$notification->getId());
+
             }catch (\Exception $e){
 
                 $notification->setSyncMessage(Notification::SYNC_STATUS_ERROR);
                 $notification->setSyncMessage($e->getMessage());
                 $notification->setSyncDate(new \DateTime());
 
+                $this->output->writeln('NTI:Notification:Sync::: Error ::: '.$notification->getId());
+                $this->output->writeln('NTI:Notification:Sync::: Error ::: '.$e->getMessage());
+
             }
 
             try{
                 $this->em->flush();
+
             }catch (\Exception $e){
                 /**
                  * here it is necessary to find the way of let now the process that check for the existence of the notification
                  * for post actions (syncRemoteStatus false), in order to prevent duplicated constraint error from the
                  * remote application.
                  */
+
+                $this->output->writeln('NTI:Notification:Sync::: Database Error with ::: '.$notification->getId());
 
             }
 

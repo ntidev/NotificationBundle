@@ -80,15 +80,20 @@ class NotificationService
     /**
      * @param Application $requestApp
      * @param $data
+     * @param Notification $notification
      * @param string $formType
-     * @return Notification|DataBaseDoctrineException|InvalidDestinationStructureException
+     * @return Notification|\Symfony\Component\Form\FormInterface
+     * @throws ApplicationNotFoundException
+     * @throws DataBaseDoctrineException
+     * @throws InvalidDestinationStatus
+     * @throws InvalidDestinationStructureException
+     * @throws NoDestinationException
      */
-    public function create(Application $requestApp, $data, $formType = NotificationType::class)
+    public function create(Application $requestApp, $data, Notification $notification, $formType = NotificationType::class)
     {
         # -- default application
         $default = $this->appService->getDefault();
 
-        $notification = new Notification();
         $notification->setFromApplication($requestApp);
 
         $form = $this->container->get('form.factory')->create($formType, $notification);
@@ -122,7 +127,7 @@ class NotificationService
 
         }elseif (null == $toApplication || !$toApplication instanceof Application){ /** -- application not found -- */
 
-            return new ApplicationNotFoundException();
+            throw new ApplicationNotFoundException();
 
         } elseif ($requestApp === $default && $default === $toApplication) {  /**  -- Handling Internal Notification --  */
 
@@ -139,33 +144,34 @@ class NotificationService
             $notification->setSyncDate(new \DateTime());
         }
 
-        # -- destinations
-        $destinations = (array_key_exists('destinations', $data) && is_array($data['destinations'])) ? $data['destinations'] : array();
-        foreach ($destinations as $destinationData) {
-            if (is_array($destinationData) && array_key_exists('destinationId', $destinationData)) {
-
-                /**
-                 * -- IMPORTANT --
-                 * CHECK IF THE destinationId is not null or empty HERE
-                 */
-
-                $destination = new Destination();
-                $destination->setStatus($stsDestinationUnread);
-                $destination->setDestinationId($destinationData['destinationId']);
-                $display = array_key_exists('destinationDisplay', $destinationData) ? $destinationData['destinationDisplay'] : $destinationData['destinationId'];
-                $destination->setDestinationDisplay($display);
-                $destination->setNotification($notification);
-                $notification->addDestination($destination);
-            } else {
-                return new InvalidDestinationStructureException();
-            }
-        }
+        # -- handle destination
+        $this->handleDestinations($notification, $data);
+//        $destinations = (array_key_exists('destinations', $data) && is_array($data['destinations'])) ? $data['destinations'] : array();
+//        foreach ($destinations as $destinationData) {
+//            if (is_array($destinationData) && array_key_exists('destinationId', $destinationData)) {
+//
+//                /**
+//                 * -- IMPORTANT --
+//                 * CHECK IF THE destinationId is not null or empty HERE
+//                 */
+//
+//                $destination = new Destination();
+//                $destination->setStatus($stsDestinationUnread);
+//                $destination->setDestinationId($destinationData['destinationId']);
+//                $display = array_key_exists('destinationDisplay', $destinationData) ? $destinationData['destinationDisplay'] : $destinationData['destinationId'];
+//                $destination->setDestinationDisplay($display);
+//                $destination->setNotification($notification);
+//                $notification->addDestination($destination);
+//            } else {
+//                return new InvalidDestinationStructureException();
+//            }
+//        }
 
         try {
             $this->em->persist($notification);
             $this->em->flush();
         } catch (\Exception $e) {
-            return new DataBaseDoctrineException($e->getMessage());
+            throw new DataBaseDoctrineException($e->getMessage());
         }
 
         return $notification;

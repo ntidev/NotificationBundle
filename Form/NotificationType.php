@@ -34,6 +34,7 @@ class NotificationType extends AbstractType
             ->add('code')
             ->add('subject')
             ->add('body')
+            ->add('allDestinations')
             ->add('scheduleDate','datetime', array('widget' => 'single_text', 'date_format' => 'm/d/Y h:i A'))
             ->add('expirationDate','datetime', array('widget' => 'single_text', 'date_format' => 'm/d/Y h:i A'))
             ->add('status', TextType::class )
