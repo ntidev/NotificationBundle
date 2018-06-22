@@ -97,7 +97,8 @@ class NotificationController extends Controller
         if (!$application->getWriteAccess())
             return new JsonResponse('Yo are not allow to create notifications.', 403);
 
-        $result = $this->get('nti.notification.service')->create($application,$data);
+        $notification = new Notification();
+        $result = $this->get('nti.notification.service')->create($application,$data,$notification);
         if ($result instanceof Notification){
             $context = SerializationContext::create()->setGroups(array('nti_notify','nti_notify_app'));
             $notification = json_decode($this->container->get('jms_serializer')->serialize($result, 'json', $context));

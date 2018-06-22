@@ -348,6 +348,10 @@ class NotificationService
         # -- preparing the request
         $url = $to->getPath().$this->prefix.$to->getRequestKey().'/notifications';
         $method = $notification->getSyncRemoteStatus() === false ? 'POST' : 'PUT';
+
+        if ($method == "PUT")
+            $url = $url."/".$notification->getCode();
+
         $context = SerializationContext::create()->setGroups(array('nti_notify_sync'));
         $body = json_decode($this->container->get('jms_serializer')->serialize($notification, 'json', $context));
 

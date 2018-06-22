@@ -161,7 +161,7 @@ class Notification
      * @Serializer\Groups("nti_notify")
      * @Serializer\SerializedName("syncMessage")
      *
-     * @ORM\Column(name="sync_message", type="string", length=255, nullable=true)
+     * @ORM\Column(name="sync_message", type="text", nullable=true)
      */
     private $syncMessage;
 

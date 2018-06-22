@@ -72,4 +72,85 @@ class NotificationRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @param array $params
+     * @return array
+     */
+    public function getAllWithPaginationSupport($params = array())
+    {
+        # -- handling user specific applications behaviors
+        $excludeApplicationsFilters = array_key_exists('exclude_applications_filters', $params) ? true : false;
+        $fromDefatulApplication = array_key_exists('from_defatul_application', $params) ? true : false;
+        $fromApplication = array_key_exists('from_application', $params) ? true : false;
+        $fromApplicationId = array_key_exists('from_application_id', $params) ? $params['from_application_id'] : '';
+        $toDefatulApplication = array_key_exists('to_defatul_application', $params) ? true : false;
+        $toApplication = array_key_exists('to_application', $params) ? true : false;
+        $toApplicationId = array_key_exists('to_application_id', $params) ? $params['to_application_id'] : '';
+
+        # -- column filters
+        $filters = array_key_exists('column_filters', $params) ? $params['column_filters'] : array();
+        # -- limit & offset
+        $limit = array_key_exists('limit', $params) ? intval($params['limit']) : 15;
+        $offset = array_key_exists('offset', $params) ? intval($params['offset']) : 0;
+        # -- sort & order
+        $sortBy = array_key_exists('sortBy', $params) ? $params['sortBy'] : 'n.scheduleDate';
+        $orderBy = array_key_exists('orderBy', $params) ? $params['orderBy'] : 'desc';
+
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('n')
+            ->from('NotificationBundle:Notification', 'n')
+            ->leftJoin('n.status', 'status')
+            ->leftJoin('n.type', 'type')
+            ->leftJoin('n.fromApplication', 'fromApplication')
+            ->leftJoin('n.toApplication', 'toApplication');
+
+        # -- not application filters options goes here
+
+
+        # -- column filters goes here
+        # columns filters
+        foreach($filters as $field => $value) {
+            if($field == "" || $value == "") continue;
+            // Manage relationships
+            switch($field) {
+                case "n.subject":
+                    $qb->andWhere($qb->expr()->like("n.subject", $qb->expr()->literal("%".$value."%")));
+                    break;
+                case "statu.name":
+                    $qb->andWhere($qb->expr()->like("status.name", $qb->expr()->literal("%".$value."%")));
+                    break;
+                case "status.code":
+                    $qb->andWhere($qb->expr()->eq("status.code", $qb->expr()->literal($value)));
+                    break;
+                case "type.name":
+                    $qb->andWhere($qb->expr()->like("type.name", $qb->expr()->literal("%".$value."%")));
+                    break;
+                case "type.code":
+                    $qb->andWhere($qb->expr()->eq("type.code", $qb->expr()->literal($value)));
+                    break;
+
+            }
+        }
+
+        # -- total records
+        $totalQb = clone $qb;
+        $total = $totalQb->select('COUNT(n)')->getQuery()->getSingleScalarResult();
+
+        # -- sort and order
+        $qb->addOrderBy($sortBy, $orderBy);
+
+        # -- limit and sort goes here
+        $qb->setMaxResults($limit);
+        $qb->setFirstResult($offset);
+
+        $notifications = $qb->getQuery()->getResult();
+
+        return array(
+            'notifications' => $notifications,
+            'totalRecords' => intval($total),
+            'pages' => intval(intval($total)/ $limit),
+        );
+
+    }
+
 }

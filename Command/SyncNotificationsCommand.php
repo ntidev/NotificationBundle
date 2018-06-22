@@ -90,6 +90,7 @@ class SyncNotificationsCommand extends ContainerAwareCommand
                  */
 
                 $this->output->writeln('NTI:Notification:Sync::: Database Error with ::: '.$notification->getId());
+                $this->output->writeln('NTI:Notification:Sync::: Database Error with ::: '.$e->getMessage());
 
             }
 
