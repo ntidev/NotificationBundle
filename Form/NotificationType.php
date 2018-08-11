@@ -10,6 +10,7 @@ use NTI\NotificationBundle\Form\DataTransformers\TypeTransformer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToStringTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -35,8 +36,10 @@ class NotificationType extends AbstractType
             ->add('subject')
             ->add('body')
             ->add('allDestinations')
-            ->add('scheduleDate','datetime', array('widget' => 'single_text', 'date_format' => 'm/d/Y h:i A'))
-            ->add('expirationDate','datetime', array('widget' => 'single_text', 'date_format' => 'm/d/Y h:i A'))
+//            ->add('scheduleDate','datetime', array('widget' => 'single_text', 'date_format' => 'm/d/Y h:i A'))
+            ->add('scheduleDate',TextType::class)
+//            ->add('expirationDate','datetime', array('widget' => 'single_text', 'date_format' => 'm/d/Y h:i A'))
+            ->add('expirationDate',TextType::class)
             ->add('status', TextType::class )
             ->add('type', TextType::class)
 //            ->add('fromApplication', TextType::class)
@@ -47,6 +50,9 @@ class NotificationType extends AbstractType
         $builder->get('type')->addModelTransformer(new TypeTransformer($this->em));
 //        $builder->get('fromApplication')->addModelTransformer(new ApplicationTransformer($this->em));
         $builder->get('toApplication')->addModelTransformer(new ApplicationTransformer($this->em));
+
+        $builder->get('scheduleDate')->addModelTransformer(new DateTimeToStringTransformer(null, null, 'm/d/Y h:i A'));
+        $builder->get('expirationDate')->addModelTransformer(new DateTimeToStringTransformer(null, null, 'm/d/Y h:i A'));
 
     }
 

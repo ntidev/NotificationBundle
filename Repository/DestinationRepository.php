@@ -18,6 +18,9 @@ class DestinationRepository extends \Doctrine\ORM\EntityRepository
      */
     public function getAvailableNotification(Destination $destination = null)
     {
+        if (!$destination)
+            return array();
+
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('destination')
             ->from('NotificationBundle:Destination', 'destination')

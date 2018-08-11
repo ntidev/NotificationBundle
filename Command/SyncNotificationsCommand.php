@@ -69,7 +69,6 @@ class SyncNotificationsCommand extends ContainerAwareCommand
                 $this->output->writeln('NTI:Notification:Sync::: Success ::: '.$notification->getId());
 
             }catch (\Exception $e){
-
                 $notification->setSyncMessage(Notification::SYNC_STATUS_ERROR);
                 $notification->setSyncMessage($e->getMessage());
                 $notification->setSyncDate(new \DateTime());
