@@ -152,7 +152,7 @@ class Notification
      * @Serializer\Groups("nti_notify")
      * @Serializer\SerializedName("syncRemoteStatus")
      *
-     * @ORM\Column(name="sync_remote_status", type="boolean", options={"default": "0"},nullable=true)
+     * @ORM\Column(name="sync_remote_status", type="boolean", options={"default": "0"}, nullable=true)
      */
     private $syncRemoteStatus;
 
