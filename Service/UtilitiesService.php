@@ -73,16 +73,18 @@ class UtilitiesService
      * @param UserInterface $user
      * @return bool
      */
-    public function isAuthenticated(UserInterface $user){
+    public function isAuthenticated(UserInterface $user = null){
         $authenticated = false;
-        if (!is_array($this->authRoles) && !$user->hasRole($this->authRoles))
-            return $authenticated;
+        if ($user instanceof UserInterface) {
+            if (!is_array($this->authRoles) && !$user->hasRole($this->authRoles))
+                return $authenticated;
 
-        if (is_array($this->authRoles)){
-            foreach ($this->authRoles as $role){
-                if ($user->hasRole($role)){
-                    $authenticated = true;
-                    break;
+            if (is_array($this->authRoles)) {
+                foreach ($this->authRoles as $role) {
+                    if ($user->hasRole($role)) {
+                        $authenticated = true;
+                        break;
+                    }
                 }
             }
         }
