@@ -98,22 +98,27 @@ class NotificationController extends Controller
             return new JsonResponse('Yo are not allow to create notifications.', 403);
 
         $notification = new Notification();
-        $result = $this->get('nti.notification.service')->create($application,$data,$notification);
-        if ($result instanceof Notification){
-            $context = SerializationContext::create()->setGroups(array('nti_notify','nti_notify_app'));
-            $notification = json_decode($this->container->get('jms_serializer')->serialize($result, 'json', $context));
-            return new JsonResponse($notification, 201);
-        }elseif ($result instanceof FormInterface){
-            return new JsonResponse($this->get('nti.notification.utilities.service')->getFormErrors($result), 400);
-        }elseif ($result instanceof InvalidDestinationStructureException){
-            return new JsonResponse( 'Invalid destination format detected. Must be an array with a destinationId key.', 400);
-        }elseif ($result instanceof ApplicationNotFoundException){
-            return new JsonResponse( 'We can not find the requested application. Please check the information and try again.', 400);
-        }elseif ($result instanceof DataBaseDoctrineException){
-            return new JsonResponse( "Database Error: ".$result->getMessage(), 500);
-        }
+        try {
+            $result = $this->get('nti.notification.service')->create($application, $data, $notification);
+            if ($result instanceof Notification) {
+                $context = SerializationContext::create()->setGroups(array('nti_notify', 'nti_notify_app'));
+                $notification = json_decode($this->container->get('jms_serializer')->serialize($result, 'json', $context));
+                return new JsonResponse($notification, 201);
+            }
+        }catch (\Exception $e){
+            if ($e instanceof FormInterface){
+                return new JsonResponse($this->get('nti.notification.utilities.service')->getFormErrors($e->getMessage()), 400);
+            }elseif ($e instanceof InvalidDestinationStructureException){
+                return new JsonResponse( 'Invalid destination format detected. Must be an array with a destinationId key.', 400);
+            }elseif ($e instanceof ApplicationNotFoundException){
+                return new JsonResponse( 'We can not find the requested application. Please check the information and try again.', 400);
+            }elseif ($e instanceof DataBaseDoctrineException){
+                return new JsonResponse( "Database Error: ".$e->getMessage(), 500);
+            }
 
-        return new JsonResponse( 'An unknown error occurred creating the notification.', 500);
+            return new JsonResponse( 'An unknown error occurred creating the notification.', 500);
+
+        }
     }
 
     /**
