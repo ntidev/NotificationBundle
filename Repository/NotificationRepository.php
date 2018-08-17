@@ -27,14 +27,42 @@ class NotificationRepository extends EntityRepository
             ->leftJoin('n.fromApplication', 'from_app')
             ->innerJoin('n.toApplication', 'to_app', Expr\Join::WITH,
                 $qb->expr()->andX(
-                    $qb->expr()->eq( 'to_app.isActive', true), # -- active applications
-                    $qb->expr()->eq( 'to_app.isDefault', $qb->expr()->literal(false)), # -- exclude default application
-                    $qb->expr()->isNotNull( 'to_app.requestKey'), # -- request key should not be null
+                    $qb->expr()->eq('to_app.isActive', true), # -- active applications
+                    $qb->expr()->eq('to_app.isDefault', $qb->expr()->literal(false)), # -- exclude default application
+                    $qb->expr()->isNotNull('to_app.requestKey'), # -- request key should not be null
                     $qb->expr()->neq('to_app.id', 'from_app.id')
                 )
             )
-        ->andWhere($qb->expr()->in('n.syncStatus',array('pending','error')));
+            ->andWhere($qb->expr()->in('n.syncStatus', array('pending', 'error')));
 
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * notification with pending or expired states
+     * only from the default app
+     * @return array
+     */
+    public function getStateUpdateNotifications()
+    {
+        $dateNow = new \DateTime();
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb->select('notification')
+            ->from('NotificationBundle:Notification', 'notification')
+            ->leftJoin('notification.status', 'nSts')
+            ->andWhere(
+                $qb->expr()->in('nSts.code', array('available', 'scheduled')),# -- notification status
+                $qb->expr()->andX(
+                    $qb->expr()->lte('notification.scheduleDate',':dateNow'),
+                    $qb->expr()->eq('nSts.code',  $qb->expr()->literal('scheduled'))
+                )# -- notifications with the status scheduled for the day
+            )->orWhere(
+                $qb->expr()->andX(
+                    $qb->expr()->lte('notification.expirationDate', ':dateNow'),
+                    $qb->expr()->eq('nSts.code', $qb->expr()->literal('available'))
+                )# -- Notifications with the status available expired
+            )
+            ->setParameter('dateNow', $dateNow);
         return $qb->getQuery()->getResult();
     }
 
@@ -64,7 +92,7 @@ class NotificationRepository extends EntityRepository
             ->leftJoin('n.status', 'n_sts')
             ->andWhere(
                 $qb->expr()->eq('n.allDestinations', $qb->expr()->literal(true)),
-                $qb->expr()->in('n_sts.code', array('scheduled','available'))
+                $qb->expr()->in('n_sts.code', array('scheduled', 'available'))
             );
         if ($destination)
             $qb->andWhere($qbs->expr()->notIn('n.id', $qbs->getDQL()));
@@ -109,21 +137,21 @@ class NotificationRepository extends EntityRepository
 
         # -- column filters goes here
         # columns filters
-        foreach($filters as $field => $value) {
-            if($field == "" || $value == "") continue;
+        foreach ($filters as $field => $value) {
+            if ($field == "" || $value == "") continue;
             // Manage relationships
-            switch($field) {
+            switch ($field) {
                 case "n.subject":
-                    $qb->andWhere($qb->expr()->like("n.subject", $qb->expr()->literal("%".$value."%")));
+                    $qb->andWhere($qb->expr()->like("n.subject", $qb->expr()->literal("%" . $value . "%")));
                     break;
                 case "statu.name":
-                    $qb->andWhere($qb->expr()->like("status.name", $qb->expr()->literal("%".$value."%")));
+                    $qb->andWhere($qb->expr()->like("status.name", $qb->expr()->literal("%" . $value . "%")));
                     break;
                 case "status.code":
                     $qb->andWhere($qb->expr()->eq("status.code", $qb->expr()->literal($value)));
                     break;
                 case "type.name":
-                    $qb->andWhere($qb->expr()->like("type.name", $qb->expr()->literal("%".$value."%")));
+                    $qb->andWhere($qb->expr()->like("type.name", $qb->expr()->literal("%" . $value . "%")));
                     break;
                 case "type.code":
                     $qb->andWhere($qb->expr()->eq("type.code", $qb->expr()->literal($value)));
@@ -148,7 +176,7 @@ class NotificationRepository extends EntityRepository
         return array(
             'notifications' => $notifications,
             'totalRecords' => intval($total),
-            'pages' => intval(intval($total)/ $limit),
+            'pages' => intval(intval($total) / $limit),
         );
 
     }

@@ -142,6 +142,7 @@ class NotificationService
             $notification->setCode($code);
             $notification->setSyncStatus(Notification::SYNC_STATUS_PENDING);
             $notification->setSyncDate(new \DateTime());
+            $notification->setSyncRemoteStatus(false);
         }
 
         # -- handle destination
