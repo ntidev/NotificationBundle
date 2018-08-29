@@ -164,14 +164,14 @@ class NotificationRepository extends EntityRepository
 
         # -- limit and sort goes here
         $qb->setMaxResults($limit);
-        $qb->setFirstResult($offset);
+        $qb->setFirstResult(($offset *$limit));
 
         $notifications = $qb->getQuery()->getResult();
 
         return array(
             'notifications' => $notifications,
             'totalRecords' => intval($total),
-            'pages' => intval(intval($total) / $limit),
+            'pages' => intval(ceil(intval($total) / $limit)),
         );
 
     }
