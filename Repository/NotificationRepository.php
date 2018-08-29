@@ -52,15 +52,10 @@ class NotificationRepository extends EntityRepository
             ->leftJoin('notification.status', 'nSts')
             ->andWhere(
                 $qb->expr()->in('nSts.code', array('available', 'scheduled')),# -- notification status
-                $qb->expr()->andX(
-                    $qb->expr()->lte('notification.scheduleDate',':dateNow'),
-                    $qb->expr()->eq('nSts.code',  $qb->expr()->literal('scheduled'))
-                )# -- notifications with the status scheduled for the day
-            )->orWhere(
-                $qb->expr()->andX(
-                    $qb->expr()->lte('notification.expirationDate', ':dateNow'),
-                    $qb->expr()->eq('nSts.code', $qb->expr()->literal('available'))
-                )# -- Notifications with the status available expired
+                $qb->expr()->orX(
+                    $qb->expr()->lte('notification.scheduleDate',':dateNow'),# -- notifications with the status scheduled for the day
+                    $qb->expr()->lte('notification.expirationDate', ':dateNow')# -- Notifications with the status available expired
+                )
             )
             ->setParameter('dateNow', $dateNow);
         return $qb->getQuery()->getResult();
@@ -169,14 +164,14 @@ class NotificationRepository extends EntityRepository
 
         # -- limit and sort goes here
         $qb->setMaxResults($limit);
-        $qb->setFirstResult($offset);
+        $qb->setFirstResult(($offset *$limit));
 
         $notifications = $qb->getQuery()->getResult();
 
         return array(
             'notifications' => $notifications,
             'totalRecords' => intval($total),
-            'pages' => intval(intval($total) / $limit),
+            'pages' => intval(ceil(intval($total) / $limit)),
         );
 
     }

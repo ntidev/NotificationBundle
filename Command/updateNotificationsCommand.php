@@ -44,7 +44,7 @@ class updateNotificationsCommand extends ContainerAwareCommand
         $stsAvailable = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'available'));
         $dateNow = new \DateTime();
 
-        $this->output->writeln('NTI:Notification:Update::: SYNCHRONIZATION STARTED.');
+        $this->output->writeln('NTI:Notification:Update::: UPDATE STATE STARTED.');
 
         # -- validating the default application
         /** @var Application $default */
@@ -58,13 +58,20 @@ class updateNotificationsCommand extends ContainerAwareCommand
         /** @var Notification $notification */
         foreach ($notifications as $notification) {
             try {
-                $this->output->writeln('NTI:Notification:Update::: Processing ::: ' . $notification->getId());
+
                 if($notification->getStatus()->getCode() == 'available'  && $notification->getExpirationDate() <= $dateNow){
+                    $this->output->writeln('NTI:Notification:Update::: Processing ::: ' . $notification->getId());
                     $notification->setStatus($stsExpired);
+                    $this->output->writeln('NTI:Notification:Update::: Changes ::: ' . $notification->getStatus()->getCode());
+                    $this->output->writeln('NTI:Notification:Update::: Success ::: ' . $notification->getId());
+
                 }elseif($notification->getStatus()->getCode() == 'scheduled'  && $notification->getScheduleDate() <= $dateNow) {
+                    $this->output->writeln('NTI:Notification:Update::: Processing ::: ' . $notification->getId());
                     $notification->setStatus($stsAvailable);
+                    $this->output->writeln('NTI:Notification:Update::: Changes ::: ' . $notification->getStatus()->getCode());
+                    $this->output->writeln('NTI:Notification:Update::: Success ::: ' . $notification->getId());
                 }
-                $this->output->writeln('NTI:Notification:Update::: Success ::: ' . $notification->getId());
+
                 $this->em->flush();
             } catch (\Exception $e) {
                 $this->output->writeln('NTI:Notification:Update::: Database Error with ::: ' . $notification->getId());
@@ -72,7 +79,7 @@ class updateNotificationsCommand extends ContainerAwareCommand
             }
         }
 
-        $this->output->writeln('NTI:Notification:Update::: UPDATE OF THE STATES FINISHED.');
+        $this->output->writeln('NTI:Notification:Update::: UPDATE STATE FINISHED.');
 
     }
 
