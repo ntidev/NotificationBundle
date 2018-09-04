@@ -95,7 +95,7 @@ class NotificationRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
- /**
+    /**
      * @param array $params
      * @return array
      */
@@ -154,31 +154,21 @@ class NotificationRepository extends EntityRepository
                     break;
 
                 case "n.scheduleDate":
-                    try {
-                        $date = new \DateTime($value);
-                        $dateStart = clone $date;
-                        $dateStart->setTime(0,0,0);
-                        $dateEnd = clone $date;
-                        $dateEnd->setTime(23,59,59);
-                        $qb->andWhere($qb->expr()->orX(
-                            $qb->andWhere('n.scheduleDate >= :startScheduleDate')->setParameter('startScheduleDate', $dateStart, \Doctrine\DBAL\Types\Type::DATE),
-                            $qb->andWhere('n.scheduleDate <= :endScheduleDate')->setParameter('endScheduleDate', $dateEnd, \Doctrine\DBAL\Types\Type::DATE)
-                        ));
-                    } catch (\Exception $ex) {}
+                    $start_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value."00:00:00")->format("Y-m-d H:i:s");
+                    $end_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value."23:59:59")->format("Y-m-d H:i:s");
+                    $qb->andWhere(
+                        $qb->expr()->gte("n.scheduleDate", $qb->expr()->literal($start_date)),
+                        $qb->expr()->lte("n.scheduleDate", $qb->expr()->literal($end_date))
+                    );
                     break;
 
                 case "n.expirationDate":
-                    try {
-                        $date = new \DateTime($value);
-                        $dateStart = clone $date;
-                        $dateStart->setTime(0,0,0);
-                        $dateEnd = clone $date;
-                        $dateEnd->setTime(23,59,59);
-                        $qb->andWhere($qb->expr()->orX(
-                            $qb->andWhere('n.expirationDate >= :startExpirationDate')->setParameter('startExpirationDate', $dateStart, \Doctrine\DBAL\Types\Type::DATE),
-                            $qb->andWhere('n.expirationDate <= :endExpirationDate')->setParameter('endExpirationDate', $dateEnd, \Doctrine\DBAL\Types\Type::DATE)
-                        ));
-                    } catch (\Exception $ex) {}
+                    $start_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value."00:00:00")->format("Y-m-d H:i:s");
+                    $end_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value."23:59:59")->format("Y-m-d H:i:s");
+                    $qb->andWhere(
+                        $qb->expr()->gte("n.expirationDate", $qb->expr()->literal($start_date)),
+                        $qb->expr()->lte("n.expirationDate", $qb->expr()->literal($end_date))
+                    );
                     break;
             }
         }
