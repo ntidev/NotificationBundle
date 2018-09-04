@@ -172,32 +172,6 @@ class NotificationController extends Controller
             }
             return new JsonResponse( 'An unknown error occurred creating the notification.', 500);
         }
-//        $result = $this->get('nti.notification.service')->update($application,$notification, $data);
-//        if ($result instanceof Notification){
-//            $context = SerializationContext::create()->setGroups(array('nti_notify','nti_notify_app'));
-//            $notification = json_decode($this->container->get('jms_serializer')->serialize($result, 'json', $context));
-//            return new JsonResponse($notification, 200);
-//        }elseif ($result instanceof FormInterface) {
-//            return new JsonResponse($this->get('nti.notification.utilities.service')->getFormErrors($result), 400);
-//        }elseif ($result instanceof InvalidDestinationStructureException) {
-//            return new JsonResponse('Invalid destination format detected. Must be an array with a destinationId key.', 400);
-//        }elseif ($result instanceof NoDestinationException) {
-//            return new JsonResponse('The Notification must contain minimum one destination.', 400);
-//        }
-
-
-
-
-        // -- old
-
-//        }elseif ($result instanceof ApplicationNotFoundException){
-//            return new JsonResponse( 'We can not find the requested application. Please check the information and try again.', 400);
-//        }elseif ($result instanceof DataBaseDoctrineException){
-//            return new JsonResponse( "Database Error: ".$result->getMessage(), 500);
-//        }
-
-
-
 
     }
 
