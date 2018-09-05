@@ -9,7 +9,7 @@
 namespace NTI\NotificationBundle\Exception;
 
 
-class ExpirationDateLowerScheduleDateException extends \Exception
+class ExpirationDateLowerThanScheduleDateException extends \Exception
 {
 
 }

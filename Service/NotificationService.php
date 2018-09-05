@@ -21,8 +21,8 @@ use NTI\NotificationBundle\Exception\InvalidToApplicationException;
 use NTI\NotificationBundle\Exception\NoDefaultApplicationException;
 use NTI\NotificationBundle\Exception\NoDestinationException;
 use NTI\NotificationBundle\Exception\SyncRequestException;
-use NTI\NotificationBundle\Exception\ScheduleDateLowerExpirationDateException;
-use NTI\NotificationBundle\Exception\ExpirationDateLowerScheduleDateException;
+use NTI\NotificationBundle\Exception\ExpirationDateLowerThanScheduleDateException;
+use NTI\NotificationBundle\Exception\ScheduleDateHigherThanExpirationDateException;
 use NTI\NotificationBundle\Form\NotificationType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -90,8 +90,8 @@ class NotificationService
      * @throws InvalidDestinationStatus
      * @throws InvalidDestinationStructureException
      * @throws NoDestinationException
-     * @throws ScheduleDateLowerExpirationDateException
-     * @throws ExpirationDateLowerScheduleDateException
+     * @throws ScheduleDateHigherThanExpirationDateException
+     * @throws ExpirationDateLowerThanScheduleDateException
      */
     public function create(Application $requestApp, $data, Notification $notification, $formType = NotificationType::class)
     {
@@ -120,12 +120,10 @@ class NotificationService
             $notification->setStatus($stsAvailable);
         }
 
-        if($data['scheduleDate'] > $data['expirationDate'])
-            throw new ScheduleDateLowerExpirationDateException();
-
-        if($data['expirationDate'] < $data['scheduleDate'])
-            throw new ExpirationDateLowerScheduleDateException();
-
+        if($notification->getScheduleDate() > $notification->getExpirationDate())
+            throw new ScheduleDateHigherThanExpirationDateException();
+        if($notification->getExpirationDate() < $notification->getScheduleDate())
+            throw new ExpirationDateLowerThanScheduleDateException();
 
         $toApplication = $notification->getToApplication();
 
@@ -181,8 +179,8 @@ class NotificationService
      * @throws InvalidDestinationStructureException
      * @throws NoDestinationException
      * @throws InvalidDestinationStatus
-     * @throws ScheduleDateLowerExpirationDateException
-     * @throws ExpirationDateLowerScheduleDateException
+     * @throws ScheduleDateHigherThanExpirationDateException
+     * @throws ExpirationDateLowerThanScheduleDateException
      */
     public function update(Application $requestApp, Notification $notification,  $data, $isPatch = false, $formType = NotificationType::class)
     {
@@ -199,10 +197,10 @@ class NotificationService
             return $form;
 
         if($notification->getScheduleDate() > $notification->getExpirationDate())
-            throw new ScheduleDateLowerExpirationDateException();
-
+            throw new ScheduleDateHigherThanExpirationDateException();
         if($notification->getExpirationDate() < $notification->getScheduleDate())
-            throw new ExpirationDateLowerScheduleDateException();
+            throw new ExpirationDateLowerThanScheduleDateException();
+
 
 
         // -- can not change this
