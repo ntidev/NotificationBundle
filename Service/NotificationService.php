@@ -21,6 +21,8 @@ use NTI\NotificationBundle\Exception\InvalidToApplicationException;
 use NTI\NotificationBundle\Exception\NoDefaultApplicationException;
 use NTI\NotificationBundle\Exception\NoDestinationException;
 use NTI\NotificationBundle\Exception\SyncRequestException;
+use NTI\NotificationBundle\Exception\ExpirationDateLowerThanScheduleDateException;
+use NTI\NotificationBundle\Exception\ScheduleDateHigherThanExpirationDateException;
 use NTI\NotificationBundle\Form\NotificationType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -88,6 +90,8 @@ class NotificationService
      * @throws InvalidDestinationStatus
      * @throws InvalidDestinationStructureException
      * @throws NoDestinationException
+     * @throws ScheduleDateHigherThanExpirationDateException
+     * @throws ExpirationDateLowerThanScheduleDateException
      */
     public function create(Application $requestApp, $data, Notification $notification, $formType = NotificationType::class)
     {
@@ -115,6 +119,11 @@ class NotificationService
             $notification->setScheduleDate(new \DateTime());
             $notification->setStatus($stsAvailable);
         }
+
+        if($notification->getScheduleDate() > $notification->getExpirationDate())
+            throw new ScheduleDateHigherThanExpirationDateException();
+        if($notification->getExpirationDate() < $notification->getScheduleDate())
+            throw new ExpirationDateLowerThanScheduleDateException();
 
         $toApplication = $notification->getToApplication();
 
@@ -147,27 +156,6 @@ class NotificationService
 
         # -- handle destination
         $this->handleDestinations($notification, $data);
-//        $destinations = (array_key_exists('destinations', $data) && is_array($data['destinations'])) ? $data['destinations'] : array();
-//        foreach ($destinations as $destinationData) {
-//            if (is_array($destinationData) && array_key_exists('destinationId', $destinationData)) {
-//
-//                /**
-//                 * -- IMPORTANT --
-//                 * CHECK IF THE destinationId is not null or empty HERE
-//                 */
-//
-//                $destination = new Destination();
-//                $destination->setStatus($stsDestinationUnread);
-//                $destination->setDestinationId($destinationData['destinationId']);
-//                $display = array_key_exists('destinationDisplay', $destinationData) ? $destinationData['destinationDisplay'] : $destinationData['destinationId'];
-//                $destination->setDestinationDisplay($display);
-//                $destination->setNotification($notification);
-//                $notification->addDestination($destination);
-//            } else {
-//                return new InvalidDestinationStructureException();
-//            }
-//        }
-
         try {
             $this->em->persist($notification);
             $this->em->flush();
@@ -191,6 +179,8 @@ class NotificationService
      * @throws InvalidDestinationStructureException
      * @throws NoDestinationException
      * @throws InvalidDestinationStatus
+     * @throws ScheduleDateHigherThanExpirationDateException
+     * @throws ExpirationDateLowerThanScheduleDateException
      */
     public function update(Application $requestApp, Notification $notification,  $data, $isPatch = false, $formType = NotificationType::class)
     {
@@ -205,6 +195,13 @@ class NotificationService
         $form->submit($data,!$isPatch);
         if(!$form->isValid())
             return $form;
+
+        if($notification->getScheduleDate() > $notification->getExpirationDate())
+            throw new ScheduleDateHigherThanExpirationDateException();
+        if($notification->getExpirationDate() < $notification->getScheduleDate())
+            throw new ExpirationDateLowerThanScheduleDateException();
+
+
 
         // -- can not change this
         $notification->setCode($code);
@@ -257,6 +254,10 @@ class NotificationService
 
         # -- destinations
         $destinationData = (array_key_exists('destinations', $data) && is_array($data['destinations'])) ? $data['destinations'] : array();
+
+        if( empty ($destinationData) || is_null($destinationData) )
+            throw new NoDestinationException();
+
 
         # -- adding new destinations.
         foreach ($destinationData as $newDestination) {
