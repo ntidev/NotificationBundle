@@ -18,11 +18,15 @@ use NTI\NotificationBundle\Exception\InvalidApplicationRequestKeyException;
 use NTI\NotificationBundle\Exception\InvalidDestinationStatus;
 use NTI\NotificationBundle\Exception\InvalidDestinationStructureException;
 use NTI\NotificationBundle\Exception\InvalidToApplicationException;
+use NTI\NotificationBundle\Exception\NoCreateCanceledNotificationException;
+use NTI\NotificationBundle\Exception\NoCreateExpiredNotificationException;
 use NTI\NotificationBundle\Exception\NoDefaultApplicationException;
 use NTI\NotificationBundle\Exception\NoDestinationException;
+use NTI\NotificationBundle\Exception\ScheduleDateLowerTodayException;
 use NTI\NotificationBundle\Exception\SyncRequestException;
 use NTI\NotificationBundle\Exception\ExpirationDateLowerThanScheduleDateException;
 use NTI\NotificationBundle\Exception\ScheduleDateHigherThanExpirationDateException;
+use NTI\NotificationBundle\Exception\ScheduleDateHigherToday;
 use NTI\NotificationBundle\Form\NotificationType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -58,7 +62,7 @@ class NotificationService
      */
     public function getAllByApplication(Application $application)
     {
-        return $this->em->getRepository(Notification::class)->findBy(array('fromApplication'=>$application), array('scheduleDate'=>'asc'));
+        return $this->em->getRepository(Notification::class)->findBy(array('fromApplication' => $application), array('scheduleDate' => 'asc'));
     }
 
     /**
@@ -68,14 +72,15 @@ class NotificationService
      */
     public function getOneByCodeAndApplication(Application $application, $code)
     {
-        return $this->em->getRepository(Notification::class)->findOneBy(array('fromApplication'=>$application, 'code'=>strtolower($code)));
+        return $this->em->getRepository(Notification::class)->findOneBy(array('fromApplication' => $application, 'code' => strtolower($code)));
     }
 
     /**
      * @param int $id
      * @return mixed
      */
-    public function getById(int $id){
+    public function getById(int $id)
+    {
         return $this->em->getRepository(Notification::class)->find($id);
     }
 
@@ -92,6 +97,9 @@ class NotificationService
      * @throws NoDestinationException
      * @throws ScheduleDateHigherThanExpirationDateException
      * @throws ExpirationDateLowerThanScheduleDateException
+     * @throws ScheduleDateLowerTodayException
+     * @throws NoCreateCanceledNotificationException
+     * @throws NoCreateExpiredNotificationException
      */
     public function create(Application $requestApp, $data, Notification $notification, $formType = NotificationType::class)
     {
@@ -109,7 +117,16 @@ class NotificationService
         $util = $this->container->get('nti.notification.utilities.service');
         $stsScheduled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'scheduled'));
         $stsAvailable = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'available'));
+        $stsExpired = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'expired'));
+        $stsCancelled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'cancelled'));
+
         $stsDestinationUnread = $this->em->getRepository(DestinationStatus::class)->findOneBy(array('code' => 'unread'));
+
+        if ($notification->getStatus() == $stsExpired)
+            throw new NoCreateExpiredNotificationException();
+
+        if ($notification->getStatus() == $stsCancelled)
+            throw new NoCreateCanceledNotificationException();
 
         /**  -- initial validations -- */
         # -- Handle Notification Status
@@ -119,10 +136,12 @@ class NotificationService
             $notification->setScheduleDate(new \DateTime());
             $notification->setStatus($stsAvailable);
         }
+        if ($notification->getScheduleDate() < new \DateTime())
+            throw new ScheduleDateLowerTodayException();
 
-        if($notification->getScheduleDate() > $notification->getExpirationDate())
+        if ($notification->getScheduleDate() > $notification->getExpirationDate())
             throw new ScheduleDateHigherThanExpirationDateException();
-        if($notification->getExpirationDate() < $notification->getScheduleDate())
+        if ($notification->getExpirationDate() < $notification->getScheduleDate())
             throw new ExpirationDateLowerThanScheduleDateException();
 
         $toApplication = $notification->getToApplication();
@@ -134,18 +153,21 @@ class NotificationService
             $notification->setSyncStatus(Notification::SYNC_STATUS_SUCCESS);
             $notification->setSyncDate(new \DateTime());
 
-        }elseif (null == $toApplication || !$toApplication instanceof Application){ /** -- application not found -- */
+        } elseif (null == $toApplication || !$toApplication instanceof Application) {
+            /** -- application not found -- */
 
             throw new ApplicationNotFoundException();
 
-        } elseif ($requestApp === $default && $default === $toApplication) {  /**  -- Handling Internal Notification --  */
+        } elseif ($requestApp === $default && $default === $toApplication) {
+            /**  -- Handling Internal Notification --  */
 
             $code = $util->getUUID();
             $notification->setCode($code);
             $notification->setSyncStatus(Notification::SYNC_STATUS_SUCCESS);
             $notification->setSyncDate(new \DateTime());
 
-        } elseif ($requestApp === $default && $default !== $toApplication) {  /**  -- Handling Internal to External Notification --  */
+        } elseif ($requestApp === $default && $default !== $toApplication) {
+            /**  -- Handling Internal to External Notification --  */
 
             $code = $util->getUUID();
             $notification->setCode($code);
@@ -181,8 +203,9 @@ class NotificationService
      * @throws InvalidDestinationStatus
      * @throws ScheduleDateHigherThanExpirationDateException
      * @throws ExpirationDateLowerThanScheduleDateException
+     * @throws ScheduleDateLowerTodayException
      */
-    public function update(Application $requestApp, Notification $notification,  $data, $isPatch = false, $formType = NotificationType::class)
+    public function update(Application $requestApp, Notification $notification, $data, $isPatch = false, $formType = NotificationType::class)
     {
 
         $default = $this->appService->getDefault();
@@ -192,16 +215,19 @@ class NotificationService
         $code = $notification->getCode();
 
         $form = $this->container->get('form.factory')->create($formType, $notification);
-        $form->submit($data,!$isPatch);
-        if(!$form->isValid())
+        $form->submit($data, !$isPatch);
+        if (!$form->isValid())
             return $form;
 
-        if($notification->getScheduleDate() > $notification->getExpirationDate())
+        if ($notification->getScheduleDate() > $notification->getExpirationDate())
             throw new ScheduleDateHigherThanExpirationDateException();
-        if($notification->getExpirationDate() < $notification->getScheduleDate())
+        if ($notification->getExpirationDate() < $notification->getScheduleDate())
             throw new ExpirationDateLowerThanScheduleDateException();
 
+        $stsScheduled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'scheduled'));
 
+        if ($notification->getStatus() == $stsScheduled && $notification->getScheduleDate() < new \DateTime())
+            throw new ScheduleDateLowerTodayException();
 
         // -- can not change this
         $notification->setCode($code);
@@ -212,13 +238,16 @@ class NotificationService
         if ($requestApp !== $default) {
             $notification->setSyncStatus(Notification::SYNC_STATUS_SUCCESS);
             $notification->setSyncDate(new \DateTime());
-        }elseif (null == $notification->getToApplication() || !$notification->getToApplication() instanceof Application){ /** -- application not found -- */
+        } elseif (null == $notification->getToApplication() || !$notification->getToApplication() instanceof Application) {
+            /** -- application not found -- */
 
             throw new ApplicationNotFoundException();
 
-        } elseif ($requestApp === $default && $default === $toApplication) {  /**  -- Handling Internal Notification --  */
+        } elseif ($requestApp === $default && $default === $toApplication) {
+            /**  -- Handling Internal Notification --  */
             $notification->setSyncStatus(Notification::SYNC_STATUS_SUCCESS);
-        } elseif ($requestApp === $default && $default !== $toApplication) {  /**  -- Handling Internal to External Notification --  */
+        } elseif ($requestApp === $default && $default !== $toApplication) {
+            /**  -- Handling Internal to External Notification --  */
             $notification->setSyncStatus(Notification::SYNC_STATUS_PENDING);
             $notification->setSyncMessage(null); // --  clear old message
         }
@@ -255,7 +284,7 @@ class NotificationService
         # -- destinations
         $destinationData = (array_key_exists('destinations', $data) && is_array($data['destinations'])) ? $data['destinations'] : array();
 
-        if( empty ($destinationData) || is_null($destinationData) )
+        if (empty ($destinationData) || is_null($destinationData))
             throw new NoDestinationException();
 
 
@@ -263,7 +292,7 @@ class NotificationService
         foreach ($destinationData as $newDestination) {
             if (is_array($newDestination) && array_key_exists('destinationId', $newDestination)) {
                 # -- create destination if not exist.
-                if($notification->hasDestination($newDestination['destinationId']) === false) {
+                if ($notification->hasDestination($newDestination['destinationId']) === false) {
                     $destination = new Destination();
                     $destination->setStatus($stsDestinationUnread);
                     $destination->setDestinationId($newDestination['destinationId']);
@@ -271,7 +300,7 @@ class NotificationService
                     $destination->setDestinationDisplay($display);
                     $destination->setNotification($notification);
                     $notification->addDestination($destination);
-                }else{
+                } else {
                     $destination = $destinationService->getOneByNotificationAndDestinationId($notification, $newDestination['destinationId']);
                     if ($destination && array_key_exists('status', $newDestination)) {
                         $validKeys = array('id', 'code');
@@ -297,15 +326,15 @@ class NotificationService
 
         # -- removing unselected destinations
         /** @var Destination $removed */
-        foreach ($current as $removed){
+        foreach ($current as $removed) {
             $found = false;
-            foreach ($destinationData as $removedData){
-                if ($removedData['destinationId'] === $removed->getDestinationId()){
+            foreach ($destinationData as $removedData) {
+                if ($removedData['destinationId'] === $removed->getDestinationId()) {
                     $found = true;
                     break;
                 }
             }
-            if (!$found){
+            if (!$found) {
                 $notification->removeDestination($removed);
                 array_push($toDelete, $removed);
             }
@@ -316,7 +345,7 @@ class NotificationService
             throw new NoDestinationException();
 
         # -- remove process
-        foreach ($toDelete as $deleted){
+        foreach ($toDelete as $deleted) {
             $this->em->remove($deleted);
         }
 
@@ -348,20 +377,20 @@ class NotificationService
             throw new InvalidApplicationRequestKeyException();
 
         # -- preparing the request
-        $url = $to->getPath().$this->prefix.$to->getRequestKey().'/notifications';
+        $url = $to->getPath() . $this->prefix . $to->getRequestKey() . '/notifications';
         $method = $notification->getSyncRemoteStatus() === false ? 'POST' : 'PUT';
 
         if ($method == "PUT")
-            $url = $url."/".$notification->getCode();
+            $url = $url . "/" . $notification->getCode();
 
         $context = SerializationContext::create()->setGroups(array('nti_notify_sync'));
         $body = json_decode($this->container->get('jms_serializer')->serialize($notification, 'json', $context));
 
         # -- sending the request
-        try{
-            $this->client->request($method,$url,array(RequestOptions::JSON =>$body));
+        try {
+            $this->client->request($method, $url, array(RequestOptions::JSON => $body));
             return $notification;
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             throw new SyncRequestException($e->getMessage());
         }
 
@@ -371,19 +400,19 @@ class NotificationService
      * Return the list of active notification status
      * @return mixed
      */
-    public function getActiveNotificationStatus(){
-        return $this->em->getRepository(Status::class)->findBy(array('isActive'=>true), array('name'=>'asc'));
+    public function getActiveNotificationStatus()
+    {
+        return $this->em->getRepository(Status::class)->findBy(array('isActive' => true), array('name' => 'asc'));
     }
 
     /**
      * Return the list of active notification status
      * @return mixed
      */
-    public function getActiveNotificationTypes(){
-        return $this->em->getRepository(Type::class)->findBy(array('isActive'=>true), array('name'=>'asc'));
+    public function getActiveNotificationTypes()
+    {
+        return $this->em->getRepository(Type::class)->findBy(array('isActive' => true), array('name' => 'asc'));
     }
-
-
 
 
 }
