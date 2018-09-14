@@ -80,7 +80,7 @@ class Notification
      * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @Serializer\SerializedName("scheduleDate")
      * @Serializer\Type("DateTime<'m/d/Y h:i:s A'>")
-     * @Assert\DateTime(format="m/d/Y h:i:s A" , message="invalid format.")
+     * @Assert\DateTime(format="m/d/Y h:i:s A" , message="Invalid format.")
      * @ORM\Column(name="schedule_date", type="datetime")
      */
     private $scheduleDate;
@@ -90,7 +90,6 @@ class Notification
      * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @Serializer\SerializedName("expirationDate")
      * @Serializer\Type("DateTime<'m/d/Y h:i:s A'>")
-     * @Assert\DateTime(format="m/d/Y h:i:s A" , message="invalid format.")
      * @ORM\Column(name="expiration_date", type="datetime", nullable=true)
      */
     private $expirationDate;
