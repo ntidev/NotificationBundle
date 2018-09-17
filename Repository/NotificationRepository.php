@@ -1,6 +1,7 @@
 <?php
 
 namespace NTI\NotificationBundle\Repository;
+
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr;
 use NTI\NotificationBundle\Entity\Destination;
@@ -53,7 +54,7 @@ class NotificationRepository extends EntityRepository
             ->andWhere(
                 $qb->expr()->in('nSts.code', array('available', 'scheduled')),# -- notification status
                 $qb->expr()->orX(
-                    $qb->expr()->lte('notification.scheduleDate',':dateNow'),# -- notifications with the status scheduled for the day
+                    $qb->expr()->lte('notification.scheduleDate', ':dateNow'),# -- notifications with the status scheduled for the day
                     $qb->expr()->lte('notification.expirationDate', ':dateNow')# -- Notifications with the status available expired
                 )
             )
@@ -152,24 +153,24 @@ class NotificationRepository extends EntityRepository
                 case "type.code":
                     $qb->andWhere($qb->expr()->eq("type.code", $qb->expr()->literal($value)));
                     break;
-
                 case "n.scheduleDate":
-                    $start_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value."00:00:00")->format("Y-m-d H:i:s");
-                    $end_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value."23:59:59")->format("Y-m-d H:i:s");
-                    $qb->andWhere(
-                        $qb->expr()->gte("n.scheduleDate", $qb->expr()->literal($start_date)),
-                        $qb->expr()->lte("n.scheduleDate", $qb->expr()->literal($end_date))
-                    );
+                    try {
+                        $start_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value . "00:00:00")->format("Y-m-d H:i:s");
+                        $end_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value . "23:59:59")->format("Y-m-d H:i:s");
+                        $qb->andWhere(
+                            $qb->expr()->gte("n.scheduleDate", $qb->expr()->literal($start_date)),
+                            $qb->expr()->lte("n.scheduleDate", $qb->expr()->literal($end_date))
+                        );
+                    } catch (\Exception $ex) {}
                     break;
-
                 case "n.expirationDate":
-                    $start_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value."00:00:00")->format("Y-m-d H:i:s");
-                    $end_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value."23:59:59")->format("Y-m-d H:i:s");
-                    $qb->andWhere(
-                        $qb->expr()->gte("n.expirationDate", $qb->expr()->literal($start_date)),
-                        $qb->expr()->lte("n.expirationDate", $qb->expr()->literal($end_date))
-                    );
-                    break;
+                        $start_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value . "00:00:00")->format("Y-m-d H:i:s");
+                        $end_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value . "23:59:59")->format("Y-m-d H:i:s");
+                        $qb->andWhere(
+                            $qb->expr()->gte("n.expirationDate", $qb->expr()->literal($start_date)),
+                            $qb->expr()->lte("n.expirationDate", $qb->expr()->literal($end_date))
+                        );
+                        break;
             }
         }
 
@@ -182,7 +183,7 @@ class NotificationRepository extends EntityRepository
 
         # -- limit and sort goes here
         $qb->setMaxResults($limit);
-        $qb->setFirstResult(($offset *$limit));
+        $qb->setFirstResult(($offset * $limit));
 
         $notifications = $qb->getQuery()->getResult();
 
