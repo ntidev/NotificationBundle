@@ -128,6 +128,8 @@ class NotificationRepository extends EntityRepository
             ->leftJoin('n.fromApplication', 'fromApplication')
             ->leftJoin('n.toApplication', 'toApplication');
 
+        $qb->andWhere($qb->expr()->in('status.code', array('scheduled', 'available' , 'expired')));
+
         # -- not application filters options goes here
 
 
@@ -154,14 +156,11 @@ class NotificationRepository extends EntityRepository
                     $qb->andWhere($qb->expr()->eq("type.code", $qb->expr()->literal($value)));
                     break;
                 case "n.scheduleDate":
-                    try {
                         $start_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value . "00:00:00")->format("Y-m-d H:i:s");
                         $end_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value . "23:59:59")->format("Y-m-d H:i:s");
                         $qb->andWhere(
                             $qb->expr()->gte("n.scheduleDate", $qb->expr()->literal($start_date)),
                             $qb->expr()->lte("n.scheduleDate", $qb->expr()->literal($end_date))
-                        );
-                    } catch (\Exception $ex) {}
                     break;
                 case "n.expirationDate":
                         $start_date = \DateTime::createFromFormat("m/d/Y H:i:s", $value . "00:00:00")->format("Y-m-d H:i:s");
