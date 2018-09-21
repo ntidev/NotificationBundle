@@ -136,9 +136,7 @@ class NotificationService
             $notification->setScheduleDate(new \DateTime());
             $notification->setStatus($stsAvailable);
         }
-        if ($notification->getScheduleDate() < new \DateTime())
-            throw new ScheduleDateLowerTodayException();
-
+        
         if ($notification->getScheduleDate() > $notification->getExpirationDate())
             throw new ScheduleDateHigherThanExpirationDateException();
         if ($notification->getExpirationDate() < $notification->getScheduleDate())
