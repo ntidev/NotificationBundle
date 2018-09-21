@@ -22,7 +22,6 @@ use NTI\NotificationBundle\Exception\NoCreateCanceledNotificationException;
 use NTI\NotificationBundle\Exception\NoCreateExpiredNotificationException;
 use NTI\NotificationBundle\Exception\NoDefaultApplicationException;
 use NTI\NotificationBundle\Exception\NoDestinationException;
-use NTI\NotificationBundle\Exception\ScheduleDateLowerTodayException;
 use NTI\NotificationBundle\Exception\SyncRequestException;
 use NTI\NotificationBundle\Exception\ExpirationDateLowerThanScheduleDateException;
 use NTI\NotificationBundle\Exception\ScheduleDateHigherThanExpirationDateException;
@@ -97,7 +96,6 @@ class NotificationService
      * @throws NoDestinationException
      * @throws ScheduleDateHigherThanExpirationDateException
      * @throws ExpirationDateLowerThanScheduleDateException
-     * @throws ScheduleDateLowerTodayException
      * @throws NoCreateCanceledNotificationException
      * @throws NoCreateExpiredNotificationException
      */
@@ -118,15 +116,11 @@ class NotificationService
         $stsScheduled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'scheduled'));
         $stsAvailable = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'available'));
         $stsExpired = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'expired'));
-        $stsCancelled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'cancelled'));
 
         $stsDestinationUnread = $this->em->getRepository(DestinationStatus::class)->findOneBy(array('code' => 'unread'));
 
         if ($notification->getStatus() == $stsExpired)
             throw new NoCreateExpiredNotificationException();
-
-        if ($notification->getStatus() == $stsCancelled)
-            throw new NoCreateCanceledNotificationException();
 
         /**  -- initial validations -- */
         # -- Handle Notification Status
@@ -136,7 +130,7 @@ class NotificationService
             $notification->setScheduleDate(new \DateTime());
             $notification->setStatus($stsAvailable);
         }
-        
+
         if ($notification->getScheduleDate() > $notification->getExpirationDate())
             throw new ScheduleDateHigherThanExpirationDateException();
         if ($notification->getExpirationDate() < $notification->getScheduleDate())
@@ -201,7 +195,6 @@ class NotificationService
      * @throws InvalidDestinationStatus
      * @throws ScheduleDateHigherThanExpirationDateException
      * @throws ExpirationDateLowerThanScheduleDateException
-     * @throws ScheduleDateLowerTodayException
      */
     public function update(Application $requestApp, Notification $notification, $data, $isPatch = false, $formType = NotificationType::class)
     {
@@ -221,11 +214,6 @@ class NotificationService
             throw new ScheduleDateHigherThanExpirationDateException();
         if ($notification->getExpirationDate() < $notification->getScheduleDate())
             throw new ExpirationDateLowerThanScheduleDateException();
-
-        $stsScheduled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'scheduled'));
-
-        if ($notification->getStatus() == $stsScheduled && $notification->getScheduleDate() < new \DateTime())
-            throw new ScheduleDateLowerTodayException();
 
         // -- can not change this
         $notification->setCode($code);
