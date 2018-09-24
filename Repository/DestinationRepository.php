@@ -31,7 +31,7 @@ class DestinationRepository extends \Doctrine\ORM\EntityRepository
                 $qb->expr()->eq('destination.destinationId', $qb->expr()->literal($destination->getDestinationId())),
                 $qb->expr()->in('nSts.code', array('available','schedule')), # -- notification status
                 $qb->expr()->in('dSts.code', array('read','unread')) # -- destination status
-            )->orderBy('notification.scheduleDate', 'ASC');
+            )->orderBy('notification.scheduleDate', 'DESC');
 
         ;
 

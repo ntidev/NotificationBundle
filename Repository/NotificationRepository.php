@@ -26,6 +26,7 @@ class NotificationRepository extends EntityRepository
         $qb->select('n')
             ->from('NotificationBundle:Notification', 'n')
             ->leftJoin('n.fromApplication', 'from_app')
+            ->leftJoin('n.status', 'status')
             ->innerJoin('n.toApplication', 'to_app', Expr\Join::WITH,
                 $qb->expr()->andX(
                     $qb->expr()->eq('to_app.isActive', true), # -- active applications
@@ -34,7 +35,8 @@ class NotificationRepository extends EntityRepository
                     $qb->expr()->neq('to_app.id', 'from_app.id')
                 )
             )
-            ->andWhere($qb->expr()->in('n.syncStatus', array('pending', 'error')));
+            ->andWhere($qb->expr()->in('n.syncStatus', array('pending', 'error')),
+                $qb->expr()->notIn('status', array('cancelled', 'expired')));
 
         return $qb->getQuery()->getResult();
     }

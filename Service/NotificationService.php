@@ -116,11 +116,16 @@ class NotificationService
         $stsScheduled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'scheduled'));
         $stsAvailable = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'available'));
         $stsExpired = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'expired'));
+        $stsCancelled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'cancelled'));
 
         $stsDestinationUnread = $this->em->getRepository(DestinationStatus::class)->findOneBy(array('code' => 'unread'));
 
         if ($notification->getStatus() == $stsExpired)
             throw new NoCreateExpiredNotificationException();
+
+        if ($notification->getStatus() == $stsCancelled)
+            throw new NoCreateCanceledNotificationException();
+
 
         /**  -- initial validations -- */
         # -- Handle Notification Status
