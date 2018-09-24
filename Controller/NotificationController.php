@@ -147,12 +147,6 @@ class NotificationController extends Controller
         if (!$notification)
             return new JsonResponse('Notification Not Found.', 404);
 
-        if ($notification->getStatus()->getCode() == 'cancelled')
-            return new JsonResponse('Notification cancelled, no further operations allow.');
-
-        if ($notification->getStatus()->getCode() == 'expired')
-            return new JsonResponse('Notification expired, no further operations allow.');
-
         try {
             $result = $this->get('nti.notification.service')->update($application, $notification, $data);
             $context = SerializationContext::create()->setGroups(array('nti_notify','nti_notify_app'));
