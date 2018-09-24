@@ -26,6 +26,7 @@ use NTI\NotificationBundle\Exception\SyncRequestException;
 use NTI\NotificationBundle\Exception\ExpirationDateLowerThanScheduleDateException;
 use NTI\NotificationBundle\Exception\ScheduleDateHigherThanExpirationDateException;
 use NTI\NotificationBundle\Exception\ScheduleDateHigherToday;
+use NTI\NotificationBundle\Exception\ExpirationDateNotTodayException;
 use NTI\NotificationBundle\Form\NotificationType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -98,6 +99,7 @@ class NotificationService
      * @throws ExpirationDateLowerThanScheduleDateException
      * @throws NoCreateCanceledNotificationException
      * @throws NoCreateExpiredNotificationException
+     * @throws ExpirationDateNotTodayException
      */
     public function create(Application $requestApp, $data, Notification $notification, $formType = NotificationType::class)
     {
@@ -119,6 +121,9 @@ class NotificationService
         $stsCancelled = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'cancelled'));
 
         $stsDestinationUnread = $this->em->getRepository(DestinationStatus::class)->findOneBy(array('code' => 'unread'));
+
+        if($notification->getExpirationDate() < new \DateTime())
+            throw new ExpirationDateNotTodayException();
 
         if ($notification->getStatus() == $stsExpired)
             throw new NoCreateExpiredNotificationException();
@@ -200,6 +205,7 @@ class NotificationService
      * @throws InvalidDestinationStatus
      * @throws ScheduleDateHigherThanExpirationDateException
      * @throws ExpirationDateLowerThanScheduleDateException
+     * @throws ExpirationDateNotTodayException
      */
     public function update(Application $requestApp, Notification $notification, $data, $isPatch = false, $formType = NotificationType::class)
     {
@@ -214,6 +220,9 @@ class NotificationService
         $form->submit($data, !$isPatch);
         if (!$form->isValid())
             return $form;
+
+        if($notification->getExpirationDate() < new \DateTime())
+            throw new ExpirationDateNotTodayException();
 
         if ($notification->getScheduleDate() > $notification->getExpirationDate())
             throw new ScheduleDateHigherThanExpirationDateException();
