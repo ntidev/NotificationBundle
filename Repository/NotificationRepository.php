@@ -54,7 +54,7 @@ class NotificationRepository extends EntityRepository
             ->from('NotificationBundle:Notification', 'notification')
             ->leftJoin('notification.status', 'nSts')
             ->andWhere(
-                $qb->expr()->in('nSts.code', array('available', 'scheduled')),# -- notification status
+                $qb->expr()->in('nSts.code', array('active', 'scheduled')),# -- notification status
                 $qb->expr()->orX(
                     $qb->expr()->lte('notification.scheduleDate', ':dateNow'),# -- notifications with the status scheduled for the day
                     $qb->expr()->lte('notification.expirationDate', ':dateNow')# -- Notifications with the status available expired
@@ -90,7 +90,7 @@ class NotificationRepository extends EntityRepository
             ->leftJoin('n.status', 'n_sts')
             ->andWhere(
                 $qb->expr()->eq('n.allDestinations', $qb->expr()->literal(true)),
-                $qb->expr()->in('n_sts.code', array('scheduled', 'available'))
+                $qb->expr()->in('n_sts.code', array('scheduled', 'active'))
             );
         if ($destination)
             $qb->andWhere($qbs->expr()->notIn('n.id', $qbs->getDQL()));
