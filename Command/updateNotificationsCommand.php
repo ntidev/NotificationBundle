@@ -41,7 +41,7 @@ class updateNotificationsCommand extends ContainerAwareCommand
         $this->container = $this->getContainer();
         $this->em = $this->getContainer()->get('doctrine')->getManager();
         $stsExpired = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'expired'));
-        $stsAvailable = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'available'));
+        $stsAvailable = $this->em->getRepository(Status::class)->findOneBy(array('code' => 'active'));
         $dateNow = new \DateTime();
 
         $this->output->writeln('NTI:Notification:Update::: UPDATE STATE STARTED.');
@@ -59,7 +59,7 @@ class updateNotificationsCommand extends ContainerAwareCommand
         foreach ($notifications as $notification) {
             try {
 
-                if($notification->getStatus()->getCode() == 'available'  && $notification->getExpirationDate() <= $dateNow){
+                if($notification->getStatus()->getCode() == 'active'  && $notification->getExpirationDate() <= $dateNow){
                     $this->output->writeln('NTI:Notification:Update::: Processing ::: ' . $notification->getId());
                     $notification->setStatus($stsExpired);
                     $this->output->writeln('NTI:Notification:Update::: Changes ::: ' . $notification->getStatus()->getCode());
