@@ -1,7 +1,7 @@
 {
     "name": "nti/notification-bundle",
     "description": "Symfony 2 notification bundle.",
-    "type": "library",
+    "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
         {
@@ -17,6 +17,7 @@
     "keywords" : [
         "NotificationBundle"
     ],
+    "target-dir" : "NTI/NotificationBundle",
     "require": {
         "php": ">=5.6",
         "jms/serializer-bundle": "^2.0",
