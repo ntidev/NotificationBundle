@@ -25,7 +25,10 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('user_destination_get_method')->end()
             ->end()
             ->children()
-                ->arrayNode('user_authentication_roles')->end()
+                ->arrayNode('user_authentication_roles')
+                    ->scalarPrototype()->end()
+                    ->requiresAtLeastOneElement()->end()
+                ->end()
             ->end();
 
         return $treeBuilder;

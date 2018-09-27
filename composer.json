@@ -10,16 +10,17 @@
         }
     ],
     "autoload" : {
-        "psr-0" : {
-            "NTI\\NotificationBundle\\" : ""
+        "psr-" : {
+            "NTI\\NotificationBundle" : ""
         }
     },
     "keywords" : [
-        "NotificationBundle"
+        "NotificationBundle", "NTI", "notifications", "symfony"
     ],
-    "target-dir" : "NTI/NotificationBundle",
+    "target-dir" : "NTI/TicketBundle",
     "require": {
         "php": ">=5.6",
+        "symfony/symfony": "^2.8",
         "jms/serializer-bundle": "^2.0",
         "guzzlehttp/guzzle": "~6.0"
     }

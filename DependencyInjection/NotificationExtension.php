@@ -33,4 +33,9 @@ class NotificationExtension extends Extension
         $container->setParameter("nti.notification.route.prefix.parsed", "/nti/notify/");
 
     }
+
+    public function getAlias()
+    {
+        return 'nti_notification';
+    }
 }
