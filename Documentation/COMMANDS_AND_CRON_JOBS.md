@@ -1,4 +1,5 @@
-#COMMANDS AND CRON-JOBS
+COMMANDS AND CRON-JOBS
+===
 
 #### Commands:
 The bundle contains two important commands.

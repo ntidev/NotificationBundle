@@ -10,7 +10,7 @@
         }
     ],
     "autoload" : {
-        "psr-" : {
+        "psr-0" : {
             "NTI\\NotificationBundle" : ""
         }
     },
