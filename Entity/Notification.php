@@ -132,7 +132,7 @@ class Notification
      * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @Serializer\SerializedName("allDestinations")
      *
-     * @ORM\Column(name="all_destination", type="boolean", options={"default": "0"},nullable=false)
+     * @ORM\Column(name="all_destination", type="boolean", options={"default": "0"}, nullable=false)
      */
     private $allDestinations;
 
@@ -507,8 +507,8 @@ class Notification
         $found = false;
 
         /** @var Destination $destination */
-        foreach ($this->destinations as $destination){
-            if ($destination->getDestinationId() === $destinationId){
+        foreach ($this->destinations as $destination) {
+            if ($destination->getDestinationId() === $destinationId) {
                 $found = true;
                 break;
             }

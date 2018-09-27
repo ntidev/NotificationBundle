@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ealcantara
- * Date: 3/5/2018
- * Time: 2:53 PM
- */
 
 namespace NTI\NotificationBundle\Service;
 

@@ -20,9 +20,13 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('nti_notification');
 
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $rootNode
+            ->children()
+                ->scalarNode('user_destination_get_method')->end()
+            ->end()
+            ->children()
+                ->arrayNode('user_authentication_roles')->end()
+            ->end();
 
         return $treeBuilder;
     }

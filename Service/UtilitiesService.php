@@ -1,6 +1,5 @@
 <?php
 
-
 namespace NTI\NotificationBundle\Service;
 
 use Symfony\Component\Form\Form;

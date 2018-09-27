@@ -47,7 +47,7 @@ class Destination
     /**
      * @Serializer\Groups({"nti_notify_destination_notification"})
      * @ORM\ManyToOne(targetEntity="NTI\NotificationBundle\Entity\Notification",inversedBy="destinations")
-     * @ORM\JoinColumn(name="notification_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="notification_id", referencedColumnName="id", onDelete="CASCADE")
      **/
     private $notification;
 

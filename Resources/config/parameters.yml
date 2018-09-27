@@ -1,7 +1,0 @@
-parameters:
-    nti.notification.route.prefix: "nti/notify"
-    nti.notification.route.prefix.parsed: "/%nti.notification.route.prefix%/"
-
-    nti.notification.user.destination.id.method: "getEmail"
-    nti.notification.user.auth.roles: [ROLE_USER]
-    nti.notification.user.granted.roles: [ROLE_USER]
