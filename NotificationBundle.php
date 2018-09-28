@@ -3,6 +3,7 @@
 namespace NTI\NotificationBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use NTI\NotificationBundle\DependencyInjection\NotificationExtension;
 
 class NotificationBundle extends Bundle
 {
