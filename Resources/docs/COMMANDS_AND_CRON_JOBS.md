@@ -1,4 +1,4 @@
-COMMANDS AND CRON-JOBS
+Commands and cron-jobs
 ===
 
 #### Commands:

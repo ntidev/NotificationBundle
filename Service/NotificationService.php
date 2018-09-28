@@ -213,7 +213,6 @@ class NotificationService
         $default = $this->appService->getDefault();
         # --
         $toApplication = $notification->getToApplication();
-        $status = $notification->getStatus();
         $code = $notification->getCode();
 
         $form = $this->container->get('form.factory')->create($formType, $notification);
@@ -221,18 +220,20 @@ class NotificationService
         if (!$form->isValid())
             return $form;
 
-        if($notification->getExpirationDate() < new \DateTime())
-            throw new ExpirationDateNotTodayException();
+        if ($notification->getStatus()->getCode() != 'cancelled') {
 
-        if ($notification->getScheduleDate() > $notification->getExpirationDate())
-            throw new ScheduleDateHigherThanExpirationDateException();
-        if ($notification->getExpirationDate() < $notification->getScheduleDate())
-            throw new ExpirationDateLowerThanScheduleDateException();
+            if ($notification->getExpirationDate() < new \DateTime())
+                throw new ExpirationDateNotTodayException();
+
+            if ($notification->getScheduleDate() > $notification->getExpirationDate())
+                throw new ScheduleDateHigherThanExpirationDateException();
+            if ($notification->getExpirationDate() < $notification->getScheduleDate())
+                throw new ExpirationDateLowerThanScheduleDateException();
+        }
 
         // -- can not change this
         $notification->setCode($code);
         $notification->setToApplication($toApplication);
-
 
         /**  -- Handling External to Internal Notification --  */
         if ($requestApp !== $default) {
