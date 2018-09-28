@@ -17,7 +17,7 @@
     "keywords" : [
         "NotificationBundle", "NTI", "notifications", "symfony"
     ],
-    "target-dir" : "NTI/TicketBundle",
+    "target-dir" : "NTI/NotificationBundle",
     "require": {
         "php": ">=5.6",
         "jms/serializer-bundle": "^2.0",
