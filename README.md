@@ -50,9 +50,8 @@ class AppKernel extends Kernel
  
  #### Documentation:
  
- * Detailed description
- * How it works
- * API
-    * Notification
-    * Destination
- * Commands and cron-jobs
+ * [How it works](/Resources/docs/HOW_IT_WORKS.md)
+ * [API](/Resources/docs/API_NOTIFICATION.md)
+    * [Notification](/Resources/docs/API_NOTIFICATION.md)
+    * [Destination](/Resources/docs/API_DESTINATION.md)
+ * [Commands and cron-jobs](/Resources/docs/COMMANDS_AND_CRON_JOBS.md)
