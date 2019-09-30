@@ -122,8 +122,7 @@ class NotificationService
 
         $stsDestinationUnread = $this->em->getRepository(DestinationStatus::class)->findOneBy(array('code' => 'unread'));
 
-        if($notification->getExpirationDate() < new \DateTime())
-            throw new ExpirationDateNotTodayException();
+
 
         if ($notification->getStatus() == $stsExpired)
             throw new NoCreateExpiredNotificationException();
@@ -141,10 +140,15 @@ class NotificationService
             $notification->setStatus($stsAvailable);
         }
 
-        if ($notification->getScheduleDate() > $notification->getExpirationDate())
-            throw new ScheduleDateHigherThanExpirationDateException();
-        if ($notification->getExpirationDate() < $notification->getScheduleDate())
-            throw new ExpirationDateLowerThanScheduleDateException();
+        $noExpiration = array_key_exists('noExpiration', $data) ? $data['noExpiration'] : false;
+        if($noExpiration === false) {
+            if($notification->getExpirationDate() < new \DateTime())
+                throw new ExpirationDateNotTodayException();
+            if ($notification->getScheduleDate() > $notification->getExpirationDate())
+                throw new ScheduleDateHigherThanExpirationDateException();
+            if ($notification->getExpirationDate() < $notification->getScheduleDate())
+                throw new ExpirationDateLowerThanScheduleDateException();
+        }
 
         $toApplication = $notification->getToApplication();
 
@@ -221,14 +225,16 @@ class NotificationService
             return $form;
 
         if ($notification->getStatus()->getCode() != 'cancelled') {
+            $noExpiration = array_key_exists('noExpiration', $data) ? $data['noExpiration'] : false;
+            if($noExpiration === false) {
+                if ($notification->getExpirationDate() < new \DateTime())
+                    throw new ExpirationDateNotTodayException();
 
-            if ($notification->getExpirationDate() < new \DateTime())
-                throw new ExpirationDateNotTodayException();
-
-            if ($notification->getScheduleDate() > $notification->getExpirationDate())
-                throw new ScheduleDateHigherThanExpirationDateException();
-            if ($notification->getExpirationDate() < $notification->getScheduleDate())
-                throw new ExpirationDateLowerThanScheduleDateException();
+                if ($notification->getScheduleDate() > $notification->getExpirationDate())
+                    throw new ScheduleDateHigherThanExpirationDateException();
+                if ($notification->getExpirationDate() < $notification->getScheduleDate())
+                    throw new ExpirationDateLowerThanScheduleDateException();
+            }
         }
 
         // -- can not change this
