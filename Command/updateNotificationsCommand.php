@@ -59,7 +59,7 @@ class updateNotificationsCommand extends ContainerAwareCommand
         foreach ($notifications as $notification) {
             try {
 
-                if($notification->getStatus()->getCode() == 'active'  && $notification->getExpirationDate() <= $dateNow){
+                if($notification->getStatus()->getCode() == 'active' && $notification->getNoExpiration() === false && $notification->getExpirationDate() <= $dateNow){
                     $this->output->writeln('NTI:Notification:Update::: Processing ::: ' . $notification->getId());
                     $notification->setStatus($stsExpired);
                     $this->output->writeln('NTI:Notification:Update::: Changes ::: ' . $notification->getStatus()->getCode());

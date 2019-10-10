@@ -95,6 +95,16 @@ class Notification
     private $expirationDate;
 
     /**
+     * @var bool
+     *
+     * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
+     * @Serializer\SerializedName("noExpiration")
+     *
+     * @ORM\Column(name="no_expiration", type="boolean", options={"default": "0"}, nullable=false)
+     */
+    private $noExpiration;
+
+    /**
      * @Serializer\Groups({"nti_notify","nti_notify_sync", "nti_notify_destination_notification"})
      * @ORM\ManyToOne(targetEntity="NTI\NotificationBundle\Entity\Status")
      * @ORM\JoinColumn(name="status_id", referencedColumnName="id")
@@ -634,5 +644,29 @@ class Notification
     public function getAllDestinations()
     {
         return $this->allDestinations;
+    }
+
+    /**
+     * Set noExpiration
+     *
+     * @param boolean $noExpiration
+     *
+     * @return Notification
+     */
+    public function setNoExpiration($noExpiration)
+    {
+        $this->noExpiration = $noExpiration;
+
+        return $this;
+    }
+
+    /**
+     * Get noExpiration
+     *
+     * @return boolean
+     */
+    public function getNoExpiration()
+    {
+        return $this->noExpiration;
     }
 }

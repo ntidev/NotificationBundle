@@ -43,7 +43,8 @@ class NotificationType extends AbstractType
             ->add('status', TextType::class )
             ->add('type', TextType::class)
 //            ->add('fromApplication', TextType::class)
-            ->add('toApplication', TextType::class);
+            ->add('toApplication', TextType::class)
+            ->add('noExpiration');
 
         # -- data transformers
         $builder->get('status')->addModelTransformer(new StatusTransformer($this->em));
