@@ -22,3 +22,8 @@ services:
         arguments: [ "@service_container" ,"@doctrine.orm.entity_manager"]
         tags:
             - { name: form.type }
+
+    # Discover Command in Symfony 4
+    NTI\NotificationBundle\Command\:
+        resource: '../../Command/*'
+        tags: ['console.command']
