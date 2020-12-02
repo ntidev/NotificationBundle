@@ -5,7 +5,6 @@ namespace NTI\NotificationBundle\Service;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class UtilitiesService
 {
@@ -69,24 +68,24 @@ class UtilitiesService
     }
 
     /**
-     * @param UserInterface $user
+     * @param $user
      * @return bool
      */
-    public function isAuthenticated(UserInterface $user = null){
+    public function isAuthenticated($user = null){
         $authenticated = false;
-        if ($user instanceof UserInterface) {
-            if (!is_array($this->authRoles) && !$user->hasRole($this->authRoles))
-                return $authenticated;
 
-            if (is_array($this->authRoles)) {
-                foreach ($this->authRoles as $role) {
-                    if ($user->hasRole($role)) {
-                        $authenticated = true;
-                        break;
-                    }
+        if (!is_array($this->authRoles) && !$user->hasRole($this->authRoles))
+            return $authenticated;
+
+        if (is_array($this->authRoles)) {
+            foreach ($this->authRoles as $role) {
+                if ($user->hasRole($role)) {
+                    $authenticated = true;
+                    break;
                 }
             }
         }
+        
 
         return $authenticated;
 
