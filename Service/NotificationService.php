@@ -3,7 +3,6 @@
 namespace NTI\NotificationBundle\Service;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use JMS\Serializer\SerializationContext;
 use NTI\NotificationBundle\Entity\Application;
@@ -25,7 +24,6 @@ use NTI\NotificationBundle\Exception\NoDestinationException;
 use NTI\NotificationBundle\Exception\SyncRequestException;
 use NTI\NotificationBundle\Exception\ExpirationDateLowerThanScheduleDateException;
 use NTI\NotificationBundle\Exception\ScheduleDateHigherThanExpirationDateException;
-use NTI\NotificationBundle\Exception\ScheduleDateHigherToday;
 use NTI\NotificationBundle\Exception\ExpirationDateNotTodayException;
 use NTI\NotificationBundle\Form\NotificationType;
 use Symfony\Component\DependencyInjection\ContainerInterface;

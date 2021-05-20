@@ -8,9 +8,7 @@ use NTI\NotificationBundle\Entity\DestinationStatus;
 use NTI\NotificationBundle\Entity\Notification;
 use NTI\NotificationBundle\Exception\DataBaseDoctrineException;
 use NTI\NotificationBundle\Exception\InvalidDestinationStatus;
-use NTI\NotificationBundle\Exception\NoDestinationException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class DestinationService
 {
@@ -30,7 +28,7 @@ class DestinationService
         $this->grantedRoles = $container->getParameter('nti.notification.user.granted.roles');
     }
 
-    public function getUserDestination(UserInterface $user)
+    public function getUserDestination($user)
     {
         try {
             $method = $this->destinationMethod;
@@ -82,10 +80,10 @@ class DestinationService
     }
 
     /**
-     * @param UserInterface $user
+     * @param $user
      * @return array
      */
-    public function getUserNotifications(UserInterface $user)
+    public function getUserNotifications($user)
     {
         # -- getting the list here
         $destination = $this->getUserDestination($user);
@@ -100,7 +98,7 @@ class DestinationService
      *
      * @param Destination|null $destination
      */
-    private function includeToAllDestinationsNotifications(UserInterface $user, Destination $destination = null)
+    private function includeToAllDestinationsNotifications($user, Destination $destination = null)
     {
         $notifications = $this->em->getRepository(Notification::class)->getByAllDestinationActive($destination);
         $unread = $this->em->getRepository(DestinationStatus::class)->findOneBy(array('code'=>'unread'));

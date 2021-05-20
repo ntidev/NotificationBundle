@@ -56,7 +56,6 @@ class UtilitiesService
         foreach ($form->all() as $childForm) {
             if ($childForm instanceof FormInterface) {
                 if ($childErrors = $this->getFormErrors($childForm)) {
-//                    $errors[$childForm->getName()] = $childErrors;
                     foreach($childErrors as $childError) {
                         $errors[] =  $childError;
                     }

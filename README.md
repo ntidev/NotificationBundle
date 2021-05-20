@@ -44,7 +44,7 @@ class AppKernel extends Kernel
      user_authentication_roles: [ROLE_USER]
  ```
  
- The bundle use your UserInterface class entity as a notification destination so you
+ The bundle use your User class entity as a notification destination so you
  can easily set your security authentication role and unique property get method that
  you want to use as destination identifier.
  
