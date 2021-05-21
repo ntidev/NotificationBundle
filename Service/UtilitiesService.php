@@ -48,21 +48,22 @@ class UtilitiesService
 
 
     public function getFormErrors(Form $form) {
+         $errors = [];
 
-        $errors = array();
-        foreach ($form->getErrors() as $error) {
-            $errors[] = $error->getMessage();
-        }
-        foreach ($form->all() as $childForm) {
-            if ($childForm instanceof FormInterface) {
-                if ($childErrors = $this->getFormErrors($childForm)) {
-                    foreach($childErrors as $childError) {
-                        $errors[] =  $childError;
-                    }
-                }
-            }
-        }
-        return $errors;
+         foreach ($form->all() as $child) {
+             $errors = array_merge(
+                 $errors,
+                 $this->getFormErrors($child)
+             );
+         }
+
+         foreach ($form->getErrors() as $error) {
+                $path = $error->getCause()->getPropertyPath();
+                $path = preg_replace("/^(data.)|(.data)|(\\])|(\\[)|children/", '', $path);
+                $errors[$path] = $error->getMessage();
+         }
+
+         return $errors;
 
     }
 
