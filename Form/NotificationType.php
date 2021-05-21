@@ -7,6 +7,7 @@ use NTI\NotificationBundle\Entity\Notification;
 use NTI\NotificationBundle\Form\DataTransformers\ApplicationTransformer;
 use NTI\NotificationBundle\Form\DataTransformers\StatusTransformer;
 use NTI\NotificationBundle\Form\DataTransformers\TypeTransformer;
+use NTI\NotificationBundle\Form\Type\UnstructuredType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
