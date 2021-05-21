@@ -39,11 +39,14 @@ class NotificationType extends AbstractType
 //            ->add('scheduleDate','datetime', array('widget' => 'single_text', 'date_format' => 'm/d/Y h:i A'))
             ->add('scheduleDate',TextType::class ,array("invalid_message" => "Invalid Effective schedule date  provided. (i.e. 01/01/2099 00:00:00 AM)"))
 //            ->add('expirationDate','datetime', array('widget' => 'single_text', 'date_format' => 'm/d/Y h:i A'))
-            ->add('expirationDate',TextType::class,array("invalid_message" => "Invalid Effective expiration date  provided. (i.e. 01/01/2099 00:00:00 AM)"))
-            ->add('status', TextType::class )
-            ->add('type', TextType::class)
-//            ->add('fromApplication', TextType::class)
-            ->add('toApplication', TextType::class)
+            ->add('expirationDate',TextType::class, array("invalid_message" => "Invalid Effective expiration date  provided. (i.e. 01/01/2099 00:00:00 AM)"))
+//             ->add('status', TextType::class)
+           ->add('status', UnstructuredType::class, ["invalid_message" => 'Invalid Status'])
+            //->add('type', TextType::class)
+           ->add('type', UnstructuredType::class, ["invalid_message" => 'Invalid Type'])
+            //->add('fromApplication', TextType::class)
+             ->add('toApplication', UnstructuredType::class, ["invalid_message" => 'Invalid toApplication'])
+//              ->add('toApplication', TextType::class)
             ->add('noExpiration');
 
         # -- data transformers
